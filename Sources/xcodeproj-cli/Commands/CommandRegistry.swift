@@ -13,6 +13,13 @@ typealias CommandHandler = @MainActor (ParsedArguments, XcodeProjUtility) throws
 typealias CommandUsageHandler = () -> Void
 typealias WorkspaceCommandHandler = @MainActor (ParsedArguments, Bool) throws -> Void
 
+/// Metadata for a command used in help generation
+struct CommandMetadata {
+  let name: String
+  let description: String
+  let category: CommandCategory
+}
+
 /// Registry for managing and executing commands
 @MainActor
 struct CommandRegistry {
@@ -226,5 +233,197 @@ struct CommandRegistry {
     } else {
       print("Unknown command: \(command)")
     }
+  }
+
+  /// Get all command metadata organized by category
+  static func getAllCommandMetadata() -> [CommandCategory: [CommandMetadata]] {
+    var metadata: [CommandCategory: [CommandMetadata]] = [:]
+
+    // File Commands
+    metadata[.fileOperations] = [
+      CommandMetadata(
+        name: AddFileCommand.commandName, description: AddFileCommand.description,
+        category: .fileOperations),
+      CommandMetadata(
+        name: AddFilesCommand.commandName, description: AddFilesCommand.description,
+        category: .fileOperations),
+      CommandMetadata(
+        name: AddFolderCommand.commandName, description: AddFolderCommand.description,
+        category: .fileOperations),
+      CommandMetadata(
+        name: AddSyncFolderCommand.commandName, description: AddSyncFolderCommand.description,
+        category: .fileOperations),
+      CommandMetadata(
+        name: MoveFileCommand.commandName, description: MoveFileCommand.description,
+        category: .fileOperations),
+      CommandMetadata(
+        name: RemoveFileCommand.commandName, description: RemoveFileCommand.description,
+        category: .fileOperations),
+    ]
+
+    // Target Commands
+    metadata[.targetManagement] = [
+      CommandMetadata(
+        name: AddTargetCommand.commandName, description: AddTargetCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: AddTargetFileCommand.commandName, description: AddTargetFileCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: DuplicateTargetCommand.commandName, description: DuplicateTargetCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: RemoveTargetCommand.commandName, description: RemoveTargetCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: RemoveTargetFileCommand.commandName, description: RemoveTargetFileCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: AddDependencyCommand.commandName, description: AddDependencyCommand.description,
+        category: .targetManagement),
+      CommandMetadata(
+        name: ListTargetsCommand.commandName, description: ListTargetsCommand.description,
+        category: .targetManagement),
+    ]
+
+    // Group Commands
+    metadata[.groupOperations] = [
+      CommandMetadata(
+        name: CreateGroupsCommand.commandName, description: CreateGroupsCommand.description,
+        category: .groupOperations),
+      CommandMetadata(
+        name: ListGroupsCommand.commandName, description: ListGroupsCommand.description,
+        category: .groupOperations),
+      CommandMetadata(
+        name: RemoveGroupCommand.commandName, description: RemoveGroupCommand.description,
+        category: .groupOperations),
+    ]
+
+    // Build Commands
+    metadata[.buildConfiguration] = [
+      CommandMetadata(
+        name: SetBuildSettingCommand.commandName, description: SetBuildSettingCommand.description,
+        category: .buildConfiguration),
+      CommandMetadata(
+        name: GetBuildSettingsCommand.commandName, description: GetBuildSettingsCommand.description,
+        category: .buildConfiguration),
+      CommandMetadata(
+        name: ListBuildSettingsCommand.commandName,
+        description: ListBuildSettingsCommand.description, category: .buildConfiguration),
+      CommandMetadata(
+        name: AddBuildPhaseCommand.commandName, description: AddBuildPhaseCommand.description,
+        category: .buildConfiguration),
+      CommandMetadata(
+        name: ListBuildConfigsCommand.commandName, description: ListBuildConfigsCommand.description,
+        category: .buildConfiguration),
+    ]
+
+    // Framework Commands
+    metadata[.frameworks] = [
+      CommandMetadata(
+        name: AddFrameworkCommand.commandName, description: AddFrameworkCommand.description,
+        category: .frameworks)
+    ]
+
+    // Package Commands
+    metadata[.swiftPackages] = [
+      CommandMetadata(
+        name: AddSwiftPackageCommand.commandName, description: AddSwiftPackageCommand.description,
+        category: .swiftPackages),
+      CommandMetadata(
+        name: RemoveSwiftPackageCommand.commandName,
+        description: RemoveSwiftPackageCommand.description, category: .swiftPackages),
+      CommandMetadata(
+        name: ListSwiftPackagesCommand.commandName,
+        description: ListSwiftPackagesCommand.description, category: .swiftPackages),
+      CommandMetadata(
+        name: UpdateSwiftPackagesCommand.commandName,
+        description: UpdateSwiftPackagesCommand.description, category: .swiftPackages),
+    ]
+
+    // Inspection Commands
+    metadata[.inspection] = [
+      CommandMetadata(
+        name: ValidateCommand.commandName, description: ValidateCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: ListFilesCommand.commandName, description: ListFilesCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: ListTreeCommand.commandName, description: ListTreeCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: ListInvalidReferencesCommand.commandName,
+        description: ListInvalidReferencesCommand.description, category: .inspection),
+      CommandMetadata(
+        name: RemoveInvalidReferencesCommand.commandName,
+        description: RemoveInvalidReferencesCommand.description, category: .inspection),
+    ]
+
+    // Path Commands
+    metadata[.pathOperations] = [
+      CommandMetadata(
+        name: UpdatePathsCommand.commandName, description: UpdatePathsCommand.description,
+        category: .pathOperations),
+      CommandMetadata(
+        name: UpdatePathsMapCommand.commandName, description: UpdatePathsMapCommand.description,
+        category: .pathOperations),
+    ]
+
+    // Scheme Commands
+    metadata[.schemes] = [
+      CommandMetadata(
+        name: CreateSchemeCommand.commandName, description: CreateSchemeCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: DuplicateSchemeCommand.commandName, description: DuplicateSchemeCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: RemoveSchemeCommand.commandName, description: RemoveSchemeCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: ListSchemesCommand.commandName, description: ListSchemesCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: SetSchemeConfigCommand.commandName, description: SetSchemeConfigCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: AddSchemeTargetCommand.commandName, description: AddSchemeTargetCommand.description,
+        category: .schemes),
+      CommandMetadata(
+        name: EnableTestCoverageCommand.commandName,
+        description: EnableTestCoverageCommand.description, category: .schemes),
+      CommandMetadata(
+        name: SetTestParallelCommand.commandName, description: SetTestParallelCommand.description,
+        category: .schemes),
+    ]
+
+    // Workspace Commands
+    metadata[.workspaces] = [
+      CommandMetadata(
+        name: "create-workspace", description: CreateWorkspaceCommand.description,
+        category: .workspaces),
+      CommandMetadata(
+        name: "add-project-to-workspace", description: AddProjectToWorkspaceCommand.description,
+        category: .workspaces),
+      CommandMetadata(
+        name: "remove-project-from-workspace",
+        description: RemoveProjectFromWorkspaceCommand.description, category: .workspaces),
+      CommandMetadata(
+        name: "list-workspace-projects", description: ListWorkspaceProjectsCommand.description,
+        category: .workspaces),
+    ]
+
+    // Cross-Project Commands
+    metadata[.crossProject] = [
+      CommandMetadata(
+        name: "add-project-reference", description: AddProjectReferenceCommand.description,
+        category: .crossProject),
+      CommandMetadata(
+        name: "add-cross-project-dependency",
+        description: AddCrossProjectDependencyCommand.description, category: .crossProject),
+    ]
+
+    return metadata
   }
 }

@@ -13,6 +13,8 @@ struct CreateSchemeCommand: Command {
   static let commandName = "create-scheme"
   static let description = "Create a new scheme for a target"
 
+  static let category: CommandCategory = .schemes
+
   @MainActor
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     guard let schemeName = arguments.positional.first else {

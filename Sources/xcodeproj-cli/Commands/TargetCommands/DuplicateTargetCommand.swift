@@ -15,6 +15,8 @@ struct DuplicateTargetCommand: Command {
 
   static let description = "Duplicate an existing target with a new name"
 
+  static let category: CommandCategory = .targetManagement
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

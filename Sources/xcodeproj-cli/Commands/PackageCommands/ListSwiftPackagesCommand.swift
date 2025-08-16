@@ -15,6 +15,8 @@ struct ListSwiftPackagesCommand: Command {
 
   static let description = "List Swift Package dependencies in the project"
 
+  static let category: CommandCategory = .swiftPackages
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     utility.listSwiftPackages()

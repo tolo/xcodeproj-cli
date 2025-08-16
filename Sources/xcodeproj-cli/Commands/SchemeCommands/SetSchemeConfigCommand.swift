@@ -13,6 +13,8 @@ struct SetSchemeConfigCommand: Command {
   static let commandName = "set-scheme-config"
   static let description = "Set build configurations for scheme actions"
 
+  static let category: CommandCategory = .schemes
+
   let schemeName: String
   let buildConfig: String?
   let runConfig: String?

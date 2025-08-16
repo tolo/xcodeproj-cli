@@ -13,6 +13,8 @@ struct SetTestParallelCommand: Command {
   static let commandName = "set-test-parallel"
   static let description = "Enable or disable test parallelization for a scheme"
 
+  static let category: CommandCategory = .schemes
+
   let schemeName: String
   let enabled: Bool
   let verbose: Bool

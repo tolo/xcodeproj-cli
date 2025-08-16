@@ -13,6 +13,8 @@ struct AddCrossProjectDependencyCommand: Command {
   static let commandName = "add-cross-project-dependency"
   static let description = "Add a dependency on a target in another project"
 
+  static let category: CommandCategory = .crossProject
+
   let targetName: String
   let externalProject: String
   let externalTarget: String

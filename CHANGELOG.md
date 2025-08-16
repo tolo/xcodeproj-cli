@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Makes it much more useful for AI coding agents and users who need a complete command reference
   - Commands are clearly grouped: Files, Targets, Groups, Build, Packages, Schemes, Workspaces, etc.
   - Previously only showed a subset of "common" commands
+- **Dynamic Help Generation**: Help text is now dynamically generated from command registry
+  - Eliminates manual synchronization when adding new commands
+  - Help always reflects actual available commands
+  - Commands automatically appear in correct category
+  - Reduces maintenance burden and prevents stale documentation
 
 ## [2.2.0] - 2025-08-16
 

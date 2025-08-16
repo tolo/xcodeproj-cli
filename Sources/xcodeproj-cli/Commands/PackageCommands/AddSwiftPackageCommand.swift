@@ -15,6 +15,8 @@ struct AddSwiftPackageCommand: Command {
 
   static let description = "Add Swift Package dependency to the project"
 
+  static let category: CommandCategory = .swiftPackages
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

@@ -13,6 +13,8 @@ struct EnableTestCoverageCommand: Command {
   static let commandName = "enable-test-coverage"
   static let description = "Enable test coverage for a scheme"
 
+  static let category: CommandCategory = .schemes
+
   let schemeName: String
   let targets: [String]?
   let verbose: Bool

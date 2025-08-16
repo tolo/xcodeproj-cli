@@ -15,6 +15,8 @@ struct ListGroupsCommand: Command {
 
   static let description = "List groups in the project as a tree structure"
 
+  static let category: CommandCategory = .groupOperations
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     utility.listGroupsTree()

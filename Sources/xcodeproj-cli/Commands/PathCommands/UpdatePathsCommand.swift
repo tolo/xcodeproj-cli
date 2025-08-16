@@ -15,6 +15,8 @@ struct UpdatePathsCommand: Command {
 
   static let description = "Update file paths with prefix replacement"
 
+  static let category: CommandCategory = .pathOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

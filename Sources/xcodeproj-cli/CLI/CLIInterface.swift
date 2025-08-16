@@ -11,7 +11,9 @@ import Foundation
 struct CLIInterface {
   static let version = "2.2.1"
 
+  @MainActor
   static func printUsage() {
+    // Print header
     print(
       """
       XcodeProj CLI v\(version)
@@ -27,75 +29,37 @@ struct CLIInterface {
         --help, -h        Show this help message
 
       ALL AVAILABLE COMMANDS:
+      """
+    )
 
-      File & Folder Operations:
-        add-file                        Add file to project
-        add-files                       Add multiple files to project
-        add-folder                      Add folder contents to project
-        add-sync-folder                 Add folder with sync to filesystem
-        move-file                       Move file to different group
-        remove-file                     Remove file from project
+    // Get command metadata from registry
+    let commandsByCategory = CommandRegistry.getAllCommandMetadata()
 
-      Target Management:
-        add-target                      Create new target
-        add-target-file                 Add file to specific targets
-        duplicate-target                Clone existing target
-        remove-target                   Remove target from project
-        remove-target-file              Remove file from specific targets
-        add-dependency                  Add target dependency
-        list-targets                    List all targets
+    // Sort categories by display order
+    let sortedCategories = CommandCategory.allCases.sorted { $0.displayOrder < $1.displayOrder }
 
-      Group Operations:
-        create-groups                   Create group hierarchies
-        list-groups                     Show group hierarchy
-        remove-group                    Remove group from project
+    // Print commands by category
+    for category in sortedCategories {
+      guard let commands = commandsByCategory[category], !commands.isEmpty else { continue }
 
-      Build Configuration:
-        set-build-setting               Set build settings
-        get-build-settings              Get build settings for target
-        list-build-settings             List all build settings
-        add-build-phase                 Add build phase to target
-        list-build-configs              Show available build configurations
+      print("\n\(category.rawValue):")
 
-      Frameworks & Dependencies:
-        add-framework                   Add framework to targets
+      // Find the longest command name for proper alignment
+      let maxCommandLength = commands.map { $0.name.count }.max() ?? 0
+      let padding = max(30, maxCommandLength + 2)
 
-      Swift Packages:
-        add-swift-package               Add Swift Package dependency
-        remove-swift-package            Remove package dependency
-        list-swift-packages             Show all package dependencies
-        update-swift-packages           Update package dependencies
+      // Sort commands alphabetically within each category
+      let sortedCommands = commands.sorted { $0.name < $1.name }
 
-      Project Inspection & Validation:
-        validate                        Check project integrity
-        list-files                      List files in project or group
-        list-tree                       Display project structure as tree
-        list-invalid-references         Show invalid file references
-        remove-invalid-references       Clean up invalid references
+      for command in sortedCommands {
+        let paddedName = command.name.padding(toLength: padding, withPad: " ", startingAt: 0)
+        print("  \(paddedName)  \(command.description)")
+      }
+    }
 
-      Path Operations:
-        update-paths                    Update file paths
-        update-paths-map                Update paths using mapping file
-
-      Schemes:
-        create-scheme                   Create new scheme
-        duplicate-scheme                Duplicate existing scheme
-        remove-scheme                   Remove scheme
-        list-schemes                    List all schemes
-        set-scheme-config               Set scheme configuration
-        add-scheme-target               Add target to scheme
-        enable-test-coverage            Enable code coverage for scheme
-        set-test-parallel               Configure parallel testing
-
-      Workspaces:
-        create-workspace                Create new workspace
-        add-project-to-workspace        Add project to workspace
-        remove-project-from-workspace   Remove project from workspace
-        list-workspace-projects         List projects in workspace
-
-      Cross-Project:
-        add-project-reference           Add reference to another project
-        add-cross-project-dependency    Add cross-project dependency
+    // Print footer
+    print(
+      """
 
       For detailed usage of any command, use: xcodeproj-cli <command> --help
       Full documentation: https://github.com/tolo/xcodeproj-cli

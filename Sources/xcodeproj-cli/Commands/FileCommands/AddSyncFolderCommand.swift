@@ -15,6 +15,8 @@ struct AddSyncFolderCommand: Command {
 
   static let description = "Add a synchronized folder that maintains sync with filesystem"
 
+  static let category: CommandCategory = .fileOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try BaseCommand.requirePositionalArguments(

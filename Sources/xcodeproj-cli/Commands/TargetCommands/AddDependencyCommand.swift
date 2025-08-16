@@ -15,6 +15,8 @@ struct AddDependencyCommand: Command {
 
   static let description = "Add a dependency relationship between targets"
 
+  static let category: CommandCategory = .targetManagement
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

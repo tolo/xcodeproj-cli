@@ -13,6 +13,8 @@ struct DuplicateSchemeCommand: Command {
   static let commandName = "duplicate-scheme"
   static let description = "Duplicate an existing scheme"
 
+  static let category: CommandCategory = .schemes
+
   let sourceName: String
   let destinationName: String
   let verbose: Bool

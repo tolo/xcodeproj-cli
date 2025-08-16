@@ -15,6 +15,8 @@ struct UpdatePathsMapCommand: Command {
 
   static let description = "Update file paths using a mapping of old to new paths"
 
+  static let category: CommandCategory = .pathOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Parse path mappings from positional arguments
     var mappings: [String: String] = [:]

@@ -15,6 +15,8 @@ struct RemoveInvalidReferencesCommand: Command {
 
   static let description = "Remove invalid file references from the project"
 
+  static let category: CommandCategory = .inspection
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Execute the command
     utility.removeInvalidReferences()

@@ -13,6 +13,8 @@ struct RemoveSchemeCommand: Command {
   static let commandName = "remove-scheme"
   static let description = "Remove a scheme"
 
+  static let category: CommandCategory = .schemes
+
   let schemeName: String
   let verbose: Bool
 

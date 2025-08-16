@@ -15,6 +15,8 @@ struct ListFilesCommand: Command {
 
   static let description = "List files in the project or a specific group"
 
+  static let category: CommandCategory = .inspection
+
   static let isReadOnly = true
 
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {

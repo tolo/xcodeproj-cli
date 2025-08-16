@@ -15,6 +15,8 @@ struct RemoveFileCommand: Command {
 
   static let description = "Remove a file from the project"
 
+  static let category: CommandCategory = .fileOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

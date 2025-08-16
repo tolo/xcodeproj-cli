@@ -15,6 +15,8 @@ struct AddFrameworkCommand: Command {
 
   static let description = "Add a framework to a target"
 
+  static let category: CommandCategory = .frameworks
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

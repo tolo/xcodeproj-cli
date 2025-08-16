@@ -15,6 +15,11 @@ jobs:
     # TO TEMPORARILY DISABLE: 
     # if: false # Remove this line to re-enable
 
+    # Optional: Skip review for certain conditions
+    if: |
+      !contains(github.event.pull_request.title, '[skip-review]') &&
+      !contains(github.event.pull_request.title, '[WIP]')
+
     # Optional: Filter by PR author
     # if: |
     #   github.event.pull_request.user.login == 'external-contributor' ||
@@ -76,7 +81,3 @@ jobs:
           # Optional: Add specific tools for running tests or linting
           # allowed_tools: "Bash(npm run test),Bash(npm run lint),Bash(npm run typecheck)"
           
-        # Optional: Skip review for certain conditions
-        if: |
-          !contains(github.event.pull_request.title, '[skip-review]') &&
-          !contains(github.event.pull_request.title, '[WIP]')

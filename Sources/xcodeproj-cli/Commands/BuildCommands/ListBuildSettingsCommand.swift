@@ -15,6 +15,8 @@ struct ListBuildSettingsCommand: Command {
 
   static let description = "List build settings for project or target"
 
+  static let category: CommandCategory = .buildConfiguration
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Get optional flags

@@ -15,6 +15,8 @@ struct SetBuildSettingCommand: Command {
 
   static let description = "Set build setting on specified targets"
 
+  static let category: CommandCategory = .buildConfiguration
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try BaseCommand.requirePositionalArguments(

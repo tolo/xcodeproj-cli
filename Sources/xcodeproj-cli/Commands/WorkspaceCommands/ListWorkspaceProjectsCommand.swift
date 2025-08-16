@@ -13,6 +13,8 @@ struct ListWorkspaceProjectsCommand: Command {
   static let commandName = "list-workspace-projects"
   static let description = "List all projects in a workspace"
 
+  static let category: CommandCategory = .workspaces
+
   static let isReadOnly = true
   let workspaceName: String
   let verbose: Bool

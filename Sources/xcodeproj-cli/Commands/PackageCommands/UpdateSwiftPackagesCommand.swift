@@ -15,6 +15,8 @@ struct UpdateSwiftPackagesCommand: Command {
 
   static let description = "Update Swift Package dependencies to their latest versions"
 
+  static let category: CommandCategory = .swiftPackages
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     let forceUpdate = arguments.hasFlag("--force", "-f")
 

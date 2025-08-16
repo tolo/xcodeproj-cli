@@ -15,6 +15,8 @@ struct RemoveGroupCommand: Command {
 
   static let description = "Remove a group and its contents from the project"
 
+  static let category: CommandCategory = .groupOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

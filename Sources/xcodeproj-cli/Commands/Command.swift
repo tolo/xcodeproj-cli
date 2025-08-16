@@ -8,6 +8,37 @@
 import Foundation
 @preconcurrency import XcodeProj
 
+/// Categories for organizing commands in help output
+enum CommandCategory: String, CaseIterable {
+  case fileOperations = "File & Folder Operations"
+  case targetManagement = "Target Management"
+  case groupOperations = "Group Operations"
+  case buildConfiguration = "Build Configuration"
+  case frameworks = "Frameworks & Dependencies"
+  case swiftPackages = "Swift Packages"
+  case inspection = "Project Inspection & Validation"
+  case pathOperations = "Path Operations"
+  case schemes = "Schemes"
+  case workspaces = "Workspaces"
+  case crossProject = "Cross-Project"
+
+  var displayOrder: Int {
+    switch self {
+    case .fileOperations: return 1
+    case .targetManagement: return 2
+    case .groupOperations: return 3
+    case .buildConfiguration: return 4
+    case .frameworks: return 5
+    case .swiftPackages: return 6
+    case .inspection: return 7
+    case .pathOperations: return 8
+    case .schemes: return 9
+    case .workspaces: return 10
+    case .crossProject: return 11
+    }
+  }
+}
+
 /// Protocol for command implementations
 protocol Command {
   /// The name of the command as used on the command line
@@ -15,6 +46,9 @@ protocol Command {
 
   /// Brief description of what the command does
   static var description: String { get }
+
+  /// Category for organizing commands in help output
+  static var category: CommandCategory { get }
 
   /// Indicates if this is a read-only command that doesn't modify the project
   static var isReadOnly: Bool { get }

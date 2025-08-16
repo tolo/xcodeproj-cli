@@ -15,6 +15,8 @@ struct ListBuildConfigsCommand: Command {
 
   static let description = "List build configurations for a target or the project"
 
+  static let category: CommandCategory = .buildConfiguration
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     let targetName = arguments.getFlag("--target", "-t")

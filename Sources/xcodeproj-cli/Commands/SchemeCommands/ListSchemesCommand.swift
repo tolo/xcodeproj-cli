@@ -13,6 +13,8 @@ struct ListSchemesCommand: Command {
   static let commandName = "list-schemes"
   static let description = "List all schemes in the project"
 
+  static let category: CommandCategory = .schemes
+
   static let isReadOnly = true
   let showShared: Bool
   let showUser: Bool

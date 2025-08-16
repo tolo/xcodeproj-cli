@@ -15,6 +15,8 @@ struct AddFilesCommand: Command {
 
   static let description = "Add multiple files to specified groups and targets in batch"
 
+  static let category: CommandCategory = .fileOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     guard !arguments.positional.isEmpty else {
       throw ProjectError.invalidArguments(

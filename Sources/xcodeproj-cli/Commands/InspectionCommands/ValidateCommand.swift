@@ -15,6 +15,8 @@ struct ValidateCommand: Command {
 
   static let description = "Validate project integrity"
 
+  static let category: CommandCategory = .inspection
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     let issues = utility.validate()

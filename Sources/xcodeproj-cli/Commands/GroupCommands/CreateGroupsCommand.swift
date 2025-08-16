@@ -15,6 +15,8 @@ struct CreateGroupsCommand: Command {
 
   static let description = "Create group hierarchies in the project"
 
+  static let category: CommandCategory = .groupOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     guard !arguments.positional.isEmpty else {

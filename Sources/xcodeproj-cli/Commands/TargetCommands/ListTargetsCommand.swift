@@ -15,6 +15,8 @@ struct ListTargetsCommand: Command {
 
   static let description = "List all targets in the project"
 
+  static let category: CommandCategory = .targetManagement
+
   static let isReadOnly = true
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     print("📱 Targets in project:")

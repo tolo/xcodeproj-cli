@@ -15,6 +15,8 @@ struct AddFolderCommand: Command {
 
   static let description = "Add files from filesystem folder to project group"
 
+  static let category: CommandCategory = .fileOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try BaseCommand.requirePositionalArguments(

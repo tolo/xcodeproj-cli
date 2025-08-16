@@ -13,6 +13,8 @@ struct AddSchemeTargetCommand: Command {
   static let commandName = "add-scheme-target"
   static let description = "Add a target to a scheme's build action"
 
+  static let category: CommandCategory = .schemes
+
   let schemeName: String
   let targetName: String
   let buildActions: [String]

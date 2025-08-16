@@ -13,6 +13,8 @@ struct RemoveProjectFromWorkspaceCommand: Command {
   static let commandName = "remove-project-from-workspace"
   static let description = "Remove a project from a workspace"
 
+  static let category: CommandCategory = .workspaces
+
   let workspaceName: String
   let projectPath: String
   let verbose: Bool

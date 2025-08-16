@@ -15,6 +15,8 @@ struct AddTargetCommand: Command {
 
   static let description = "Add a new target to the project"
 
+  static let category: CommandCategory = .targetManagement
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

@@ -13,6 +13,8 @@ struct CreateWorkspaceCommand: Command {
   static let commandName = "create-workspace"
   static let description = "Create a new workspace"
 
+  static let category: CommandCategory = .workspaces
+
   let workspaceName: String
   let verbose: Bool
 

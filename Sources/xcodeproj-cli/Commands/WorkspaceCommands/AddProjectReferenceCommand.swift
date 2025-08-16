@@ -13,6 +13,8 @@ struct AddProjectReferenceCommand: Command {
   static let commandName = "add-project-reference"
   static let description = "Add a reference to an external project"
 
+  static let category: CommandCategory = .crossProject
+
   let projectPath: String
   let groupPath: String?
   let verbose: Bool

@@ -15,6 +15,8 @@ struct MoveFileCommand: Command {
 
   static let description = "Move or rename a file in the project"
 
+  static let category: CommandCategory = .fileOperations
+
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
     // Validate required arguments
     try requirePositionalArguments(

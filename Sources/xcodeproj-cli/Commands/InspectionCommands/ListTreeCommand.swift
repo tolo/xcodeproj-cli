@@ -15,6 +15,8 @@ struct ListTreeCommand: Command {
 
   static let description = "List the complete project structure as a tree"
 
+  static let category: CommandCategory = .inspection
+
   static let isReadOnly = true
 
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {

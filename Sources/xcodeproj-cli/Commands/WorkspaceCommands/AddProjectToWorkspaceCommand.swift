@@ -13,6 +13,8 @@ struct AddProjectToWorkspaceCommand: Command {
   static let commandName = "add-project-to-workspace"
   static let description = "Add a project to an existing workspace"
 
+  static let category: CommandCategory = .workspaces
+
   let workspaceName: String
   let projectPath: String
   let verbose: Bool

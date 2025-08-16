@@ -9,7 +9,7 @@ import Foundation
 
 /// Main CLI interface for xcodeproj-cli
 struct CLIInterface {
-  static let version = "2.2.0"
+  static let version = "2.2.1"
 
   static func printUsage() {
     print(
@@ -26,53 +26,76 @@ struct CLIInterface {
         --version         Display version information
         --help, -h        Show this help message
 
-      COMMON COMMANDS:
+      ALL AVAILABLE COMMANDS:
 
       File & Folder Operations:
-        add-file <file> --group <group> --targets <target1,target2>
-          Add file to project (short: -g, -t)
-        add-folder <folder> --group <group> --targets <targets> [--recursive]
-          Add folder contents to project
-        remove-file <file> [--targets <targets>]
-          Remove file from project or specific targets
-        create-groups <group1/subgroup> [<group2>...]
-          Create group hierarchies
+        add-file                        Add file to project
+        add-files                       Add multiple files to project
+        add-folder                      Add folder contents to project
+        add-sync-folder                 Add folder with sync to filesystem
+        move-file                       Move file to different group
+        remove-file                     Remove file from project
 
       Target Management:
-        list-targets                    List all targets in project
-        add-target <name> --type <type> --bundle-id <id>
-          Create new target (types: app, framework, test)
-        duplicate-target <source> <destination>
-          Clone existing target with new name
-        add-dependency <target> --depends-on <other-target>
-          Add target dependency
+        add-target                      Create new target
+        add-target-file                 Add file to specific targets
+        duplicate-target                Clone existing target
+        remove-target                   Remove target from project
+        remove-target-file              Remove file from specific targets
+        add-dependency                  Add target dependency
+        list-targets                    List all targets
+
+      Group Operations:
+        create-groups                   Create group hierarchies
+        list-groups                     Show group hierarchy
+        remove-group                    Remove group from project
 
       Build Configuration:
-        list-build-configs [--target <target>]
-          Show available build configurations
-        set-build-setting <key> <value> --targets <targets> --configs <configs>
-          Set build settings for targets/configs
-        get-build-settings <target> [--configs <config>]
-          Get build settings for a target
+        set-build-setting               Set build settings
+        get-build-settings              Get build settings for target
+        list-build-settings             List all build settings
+        add-build-phase                 Add build phase to target
+        list-build-configs              Show available build configurations
 
-      Project Inspection:
-        validate                        Check project integrity
-        list-tree                       Display project structure as tree
-        list-files [<group>]           List files in project or group
-        list-groups                     Show group hierarchy
+      Frameworks & Dependencies:
+        add-framework                   Add framework to targets
 
       Swift Packages:
-        add-swift-package <url> --version <version> --target <target>
-          Add Swift Package dependency
+        add-swift-package               Add Swift Package dependency
+        remove-swift-package            Remove package dependency
         list-swift-packages             Show all package dependencies
-        remove-swift-package <url>      Remove package dependency
+        update-swift-packages           Update package dependencies
 
-      Schemes & Workspaces:
-        create-scheme <name> <target>   Create new scheme
+      Project Inspection & Validation:
+        validate                        Check project integrity
+        list-files                      List files in project or group
+        list-tree                       Display project structure as tree
+        list-invalid-references         Show invalid file references
+        remove-invalid-references       Clean up invalid references
+
+      Path Operations:
+        update-paths                    Update file paths
+        update-paths-map                Update paths using mapping file
+
+      Schemes:
+        create-scheme                   Create new scheme
+        duplicate-scheme                Duplicate existing scheme
+        remove-scheme                   Remove scheme
         list-schemes                    List all schemes
-        create-workspace <name>         Create new workspace
-        add-project-to-workspace <workspace> <project>
-          Add project to workspace
+        set-scheme-config               Set scheme configuration
+        add-scheme-target               Add target to scheme
+        enable-test-coverage            Enable code coverage for scheme
+        set-test-parallel               Configure parallel testing
+
+      Workspaces:
+        create-workspace                Create new workspace
+        add-project-to-workspace        Add project to workspace
+        remove-project-from-workspace   Remove project from workspace
+        list-workspace-projects         List projects in workspace
+
+      Cross-Project:
+        add-project-reference           Add reference to another project
+        add-cross-project-dependency    Add cross-project dependency
 
       For detailed usage of any command, use: xcodeproj-cli <command> --help
       Full documentation: https://github.com/tolo/xcodeproj-cli

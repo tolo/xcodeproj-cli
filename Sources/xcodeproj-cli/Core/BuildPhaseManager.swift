@@ -16,17 +16,33 @@ class BuildPhaseManager {
     self.pbxproj = pbxproj
   }
 
+  // MARK: - Utility Methods
+
+  /// Adds an item to an array only if it's not already present (using identity comparison)
+  private func addUniqueByIdentity<T: AnyObject>(_ item: T, to array: inout [T]) {
+    if !array.contains(where: { $0 === item }) {
+      array.append(item)
+    }
+  }
+
   // MARK: - Build File Collection
 
   /// Finds all build files that reference the given file reference
-  func findBuildFiles(for fileReference: PBXFileReference) -> Set<PBXBuildFile> {
-    var buildFiles: Set<PBXBuildFile> = []
+  /// Returns an array to avoid Set crashes with duplicate PBXBuildFile elements (XcodeProj 9.4.3 bug)
+  /// Uses ObjectIdentifier for O(1) duplicate detection performance
+  func findBuildFiles(for fileReference: PBXFileReference) -> [PBXBuildFile] {
+    var buildFiles: [PBXBuildFile] = []
+    var seen = Set<ObjectIdentifier>()
 
     for target in pbxproj.nativeTargets {
       for buildPhase in target.buildPhases {
         let phaseFiles = getBuildPhaseFiles(buildPhase)
         for buildFile in phaseFiles where buildFile.file === fileReference {
-          buildFiles.insert(buildFile)
+          let id = ObjectIdentifier(buildFile)
+          if !seen.contains(id) {
+            seen.insert(id)
+            buildFiles.append(buildFile)
+          }
         }
       }
     }
@@ -51,14 +67,19 @@ class BuildPhaseManager {
   }
 
   /// Adds a file to appropriate build phases based on file type
+  /// Returns array of missing targets if any were not found
+  @discardableResult
   func addFileToBuildPhases(
     fileReference: PBXFileReference,
     targets: [String],
     isCompilable: Bool
-  ) {
+  ) -> [String] {
+    var missingTargets: [String] = []
+
     for targetName in targets {
       guard let target = pbxproj.nativeTargets.first(where: { $0.name == targetName }) else {
         print("⚠️  Target '\(targetName)' not found")
+        missingTargets.append(targetName)
         continue
       }
 
@@ -71,7 +92,11 @@ class BuildPhaseManager {
 
         let buildFile = PBXBuildFile(file: fileReference)
         pbxproj.add(object: buildFile)
-        sourcesBuildPhase.files?.append(buildFile)
+        // Initialize files array if nil to prevent silent failures
+        if sourcesBuildPhase.files == nil {
+          sourcesBuildPhase.files = []
+        }
+        sourcesBuildPhase.files!.append(buildFile)
       } else {
         // Add to resources build phase for non-compilable files
         if let resourcesBuildPhase = target.buildPhases.first(where: {
@@ -79,10 +104,16 @@ class BuildPhaseManager {
         }) as? PBXResourcesBuildPhase {
           let buildFile = PBXBuildFile(file: fileReference)
           pbxproj.add(object: buildFile)
-          resourcesBuildPhase.files?.append(buildFile)
+          // Initialize files array if nil to prevent silent failures
+          if resourcesBuildPhase.files == nil {
+            resourcesBuildPhase.files = []
+          }
+          resourcesBuildPhase.files!.append(buildFile)
         }
       }
     }
+
+    return missingTargets
   }
 
   // MARK: - Private Helpers

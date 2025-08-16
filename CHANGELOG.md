@@ -5,6 +5,22 @@ All notable changes to xcodeproj-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2025-08-16
+
+### Fixed
+- **Critical: Duplicate PBXBuildFile crash** - Fixed fatal crash when removing files with duplicate build file entries
+  - Replaced `Set<PBXBuildFile>` with `Array<PBXBuildFile>` to avoid XcodeProj 9.4.3 Hashable implementation bug
+  - Added identity comparison for reliable duplicate detection
+  - Ensures batch file removal operations complete successfully even with corrupted project files
+- **Folder removal crash** - Fixed inconsistent pattern in `removeFolderReference` that could cause crashes
+
+### Improved
+- **Error Handling**: `BuildPhaseManager.addFileToBuildPhases` now returns missing targets instead of silently failing
+- **Null Safety**: Build phase files arrays are initialized if nil before appending to prevent silent failures
+- **Code Quality**: Extracted duplicate detection logic into reusable `addUniqueByIdentity()` utility method
+- **Performance**: Implemented `ObjectIdentifier` tracking for O(1) duplicate detection in large projects
+- **Test Coverage**: Added comprehensive tests for duplicate build file scenarios
+
 ## [2.1.0] - 2025-08-15
 
 ### Added

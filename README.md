@@ -2,8 +2,6 @@
 
 A powerful command-line utility for manipulating Xcode project files (.xcodeproj) without requiring Xcode or Docker. Designed for both **human developers** and **AI coding assistants** (like Claude Code, GitHub Copilot, and other LLM-based tools) to automate Xcode project management.
 
-**Version 2.0.0 Improvements**: Enhanced security, performance optimizations through intelligent caching, modular architecture with 45 commands and 55+ specialized modules, comprehensive test suite with 136+ tests, and `--verbose` flag for detailed operation insights.
-
 ## Acknowledgments
 
 This tool is built on top of the excellent [XcodeProj](https://github.com/tuist/XcodeProj) library by the Tuist team, which provides the core functionality for reading and writing Xcode project files.
@@ -26,7 +24,7 @@ The tool's comprehensive feature set was inspired by [xcodeproj-mcp-server](http
 
 ## Features
 
-### 🎯 Complete Project Manipulation (v2.0.0 Enhanced!)
+### 🎯 Complete Project Manipulation
 - **File Management** - Add, remove, move files and folders
 - **Target Management** - Create, duplicate, remove targets
 - **Build Configuration** - Modify build settings and configurations
@@ -34,11 +32,11 @@ The tool's comprehensive feature set was inspired by [xcodeproj-mcp-server](http
 - **Swift Packages** - Add/remove SPM dependencies with version validation
 - **Build Phases** - Add run scripts and copy files phases
 - **Group Management** - Create and organize project groups
-- **🆕 Scheme Management** - Create, configure, and manage Xcode schemes
-- **🆕 Workspace Support** - Create workspaces and manage multi-project setups
-- **🆕 Cross-Project Dependencies** - Link targets across different projects
-- **🆕 Build Configuration Management** - Advanced .xcconfig file support
-- **🆕 Localization Support** - Manage localizations and variant groups
+- **Scheme Management** - Create, configure, and manage Xcode schemes
+- **Workspace Support** - Create workspaces and manage multi-project setups
+- **Cross-Project Dependencies** - Link targets across different projects
+- **Build Configuration Management** - Advanced .xcconfig file support
+- **Localization Support** - Manage localizations and variant groups
 
 ### ✨ Smart Features
 - **Recursive folder scanning** with intelligent file filtering
@@ -552,7 +550,7 @@ done
 | `add-build-phase` | Add run script | `add-build-phase run_script --name "SwiftLint" --target MyApp --script "swiftlint"` |
 | `add-build-phase` | Add copy files | `add-build-phase copy_files --name "Copy Resources" --target MyApp` |
 
-### 🎨 Scheme Management (NEW in v2.0.0)
+### 🎨 Scheme Management
 | Command | Description | Example |
 |---------|-------------|---------|
 | `create-scheme` | Create new scheme | `create-scheme MyApp --target MyApp --shared` |
@@ -564,7 +562,7 @@ done
 | `enable-test-coverage` | Enable code coverage | `enable-test-coverage MyApp --targets Core,UI` |
 | `set-test-parallel` | Configure test parallelization | `set-test-parallel MyApp --enable` |
 
-### 🏗️ Workspace Management (NEW in v2.0.0)
+### 🏗️ Workspace Management
 | Command | Description | Example |
 |---------|-------------|---------|
 | `create-workspace` | Create new workspace | `create-workspace MyWorkspace` |
@@ -844,7 +842,7 @@ xcodeproj-cli/
 - **[XcodeProj](https://github.com/tuist/XcodeProj)** (MIT License)
   - Created and maintained by the [Tuist](https://tuist.io) team
   - Provides the core Xcode project file manipulation capabilities
-  - Version: 8.12.0+
+  - Version: 9.4.3+
 
 - **[PathKit](https://github.com/kylef/PathKit)** (BSD License)
   - Created by Kyle Fuller

@@ -325,6 +325,7 @@ class XcodeProjUtility {
     }
 
     // Collect all build files that reference this file
+    // Using Array instead of Set to avoid crashes with duplicate PBXBuildFile elements
     let buildFilesToDelete = buildPhaseManager.findBuildFiles(for: fileRef)
 
     // Remove from all groups
@@ -333,7 +334,9 @@ class XcodeProjUtility {
     }
 
     // Remove build files from all build phases
-    buildPhaseManager.removeBuildFiles { buildFilesToDelete.contains($0) }
+    buildPhaseManager.removeBuildFiles { buildFile in
+      buildFilesToDelete.contains(where: { $0 === buildFile })
+    }
 
     // Delete all collected build files from the project
     for buildFile in buildFilesToDelete {
@@ -386,6 +389,15 @@ class XcodeProjUtility {
     throw ProjectError.groupNotFound(groupPath)
   }
 
+  // MARK: - Utility Methods
+
+  /// Adds an item to an array only if it's not already present (using identity comparison)
+  private func addUniqueByIdentity<T: AnyObject>(_ item: T, to array: inout [T]) {
+    if !array.contains(where: { $0 === item }) {
+      array.append(item)
+    }
+  }
+
   // MARK: - Group Removal Helper Methods
 
   /// Contains collected contents from a group hierarchy
@@ -432,13 +444,26 @@ class XcodeProjUtility {
   /// Removes file references from all build phases using BuildPhaseManager
   private func removeFilesFromBuildPhases(_ files: [PBXFileReference]) {
     // Collect all build files that need to be removed
-    var buildFilesToDelete: Set<PBXBuildFile> = []
+    // Using Array instead of Set to avoid crashes with duplicate PBXBuildFile elements (XcodeProj 9.4.3 bug)
+    // Uses ObjectIdentifier for O(1) duplicate detection performance
+    var buildFilesToDelete: [PBXBuildFile] = []
+    var seen = Set<ObjectIdentifier>()
+
     for fileRef in files {
-      buildFilesToDelete.formUnion(buildPhaseManager.findBuildFiles(for: fileRef))
+      let foundBuildFiles = buildPhaseManager.findBuildFiles(for: fileRef)
+      for buildFile in foundBuildFiles {
+        let id = ObjectIdentifier(buildFile)
+        if !seen.contains(id) {
+          seen.insert(id)
+          buildFilesToDelete.append(buildFile)
+        }
+      }
     }
 
     // Remove build files from their respective build phases
-    buildPhaseManager.removeBuildFiles { buildFilesToDelete.contains($0) }
+    buildPhaseManager.removeBuildFiles { buildFile in
+      buildFilesToDelete.contains(where: { $0 === buildFile })
+    }
 
     // Delete all collected build files from the project
     for buildFile in buildFilesToDelete {
@@ -496,7 +521,10 @@ class XcodeProjUtility {
     }
 
     // Remove build files from build phases
-    buildPhaseManager.removeBuildFiles { buildFilesToDelete.contains($0) }
+    // Use identity comparison to match the fix pattern and avoid Set crashes
+    buildPhaseManager.removeBuildFiles { buildFile in
+      buildFilesToDelete.contains(where: { $0 === buildFile })
+    }
 
     // Delete all collected build files from the project
     for buildFile in buildFilesToDelete {

@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2.2.1] - 2025-08-16
 
 ### Improved
-- **Help Command**: The `-h`/`--help` command now displays ALL 52 available commands organized by category
+- **Help Command**: The `-h`/`--help` command now displays ALL 47 available commands organized by category
   - Makes it much more useful for AI coding agents and users who need a complete command reference
   - Commands are clearly grouped: Files, Targets, Groups, Build, Packages, Schemes, Workspaces, etc.
   - Previously only showed a subset of "common" commands

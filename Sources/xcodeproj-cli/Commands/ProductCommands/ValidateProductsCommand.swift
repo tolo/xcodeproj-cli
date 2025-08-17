@@ -57,10 +57,18 @@ class ValidateProductsCommand: Command {
         }
 
         // Remove orphaned products
-        let orphanedCount = try productManager.removeOrphanedProducts()
-        if orphanedCount > 0 {
-          print("  ✅ Removed \(orphanedCount) orphaned product reference(s)")
-          fixedCount += orphanedCount
+        do {
+          let orphanedCount = try productManager.removeOrphanedProducts()
+          if orphanedCount > 0 {
+            print("  ✅ Removed \(orphanedCount) orphaned product reference(s)")
+            fixedCount += orphanedCount
+          }
+        } catch ProjectError.libraryLimitation(let message) {
+          print("  ⚠️  Cannot auto-fix: \(message)")
+          // Continue with other fixes rather than failing entirely
+        } catch {
+          // Re-throw unexpected errors
+          throw error
         }
 
         if fixedCount > 0 {

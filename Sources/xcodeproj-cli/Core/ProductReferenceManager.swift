@@ -71,7 +71,8 @@ class ProductReferenceManager {
       issues.append(
         ValidationIssue(
           type: .missingProductsGroup,
-          message: "Products group is missing from project"
+          message: "Products group is missing from project",
+          severity: .error
         ))
     }
 
@@ -82,7 +83,9 @@ class ProductReferenceManager {
         issues.append(
           ValidationIssue(
             type: .missingProductReference,
-            message: "Target '\(target.name)' missing product type specification"
+            message: "Target '\(target.name)' missing product type specification",
+            targetName: target.name,
+            severity: .error
           )
         )
       }
@@ -93,7 +96,8 @@ class ProductReferenceManager {
       issues.append(
         ValidationIssue(
           type: .missingProductReference,
-          message: "Complete product reference validation requires XcodeProj library v10.0+"
+          message: "Complete product reference validation requires XcodeProj library v10.0+",
+          severity: .info
         )
       )
     }
@@ -108,7 +112,11 @@ class ProductReferenceManager {
     // Use lazy evaluation for memory efficiency with large projects
     return productsGroup.children.lazy
       .compactMap { $0 as? PBXFileReference }
-      .filter { _ in true }  // Placeholder for future filtering when library supports it
+      // NOTE: The filter { _ in true } is intentionally a no-op placeholder.
+      // When XcodeProj library v10.0+ provides access to productReference,
+      // this will be replaced with actual orphan detection logic:
+      // .filter { !isReferencedByAnyTarget($0) }
+      .filter { _ in true }
   }
 
   func removeOrphanedProducts() throws -> Int {
@@ -330,4 +338,29 @@ struct ValidationIssue: Sendable {
 
   let type: IssueType
   let message: String
+
+  // Structured data for programmatic access
+  let targetName: String?
+  let productName: String?
+  let severity: Severity
+
+  enum Severity: String, Sendable {
+    case error
+    case warning
+    case info
+  }
+
+  init(
+    type: IssueType,
+    message: String,
+    targetName: String? = nil,
+    productName: String? = nil,
+    severity: Severity = .error
+  ) {
+    self.type = type
+    self.message = message
+    self.targetName = targetName
+    self.productName = productName
+    self.severity = severity
+  }
 }

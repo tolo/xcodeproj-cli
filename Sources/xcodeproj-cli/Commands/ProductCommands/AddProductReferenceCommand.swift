@@ -6,21 +6,25 @@ class AddProductReferenceCommand: Command {
   static let commandName: String = "add-product-reference"
   static let description: String =
     "Manually add or update a product reference for a specific target"
-  static let category: CommandCategory = .inspection
+  static let category: CommandCategory = .buildConfiguration
   static let isReadOnly: Bool = false
 
   @MainActor
   static func execute(with arguments: ParsedArguments, utility: XcodeProjUtility) throws {
-    guard let targetName = arguments.positional.first else {
+    // Validate target name with security checks
+    guard let targetName = try ProductCommandBase.validateTargetArgument(arguments) else {
       throw ProjectError.invalidArguments("Target name is required")
     }
-    let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
 
     guard let target = utility.pbxproj.nativeTargets.first(where: { $0.name == targetName }) else {
       throw ProjectError.targetNotFound(targetName)
     }
 
+    // Validate custom product name if provided
     let productName = arguments.flags["name"]
+    if let name = productName {
+      try ProductCommandBase.validateProductNameSecurity(name)
+    }
 
     let productType: PBXProductType?
     if let typeString = arguments.flags["type"] {
@@ -34,12 +38,12 @@ class AddProductReferenceCommand: Command {
 
     print("🔧 Adding product reference to target '\(targetName)'...")
 
-    try productManager.addProductReference(
-      to: target, productName: productName, productType: productType)
+    let finalProductName = try ProductCommandBase.executeWithSave(with: arguments, utility: utility) { productManager in
+      try productManager.addProductReference(
+        to: target, productName: productName, productType: productType)
+      return productName ?? "\(targetName).app"
+    }
 
-    try utility.save()
-
-    let finalProductName = productName ?? "\(targetName).app"
     print("✅ Added product reference '\(finalProductName)' to target '\(targetName)'")
   }
 

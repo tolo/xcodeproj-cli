@@ -16,18 +16,79 @@ class ProductCommandBase {
         return result
     }
     
-    /// Common validation for target name argument
+    /// Common validation for target name argument with security checks
     static func validateTargetArgument(_ arguments: ParsedArguments) throws -> String? {
         guard let targetName = arguments.positional.first, !targetName.isEmpty else {
             return nil
         }
         
-        // Basic validation
-        guard targetName.count <= 255 else {
+        // Apply comprehensive security validation
+        try validateTargetNameSecurity(targetName)
+        
+        return targetName
+    }
+    
+    /// Security validation for target names
+    private static func validateTargetNameSecurity(_ name: String) throws {
+        // Check for empty or whitespace-only names
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ProjectError.invalidArguments("Target name cannot be empty or whitespace")
+        }
+        
+        // Check for reasonable length (max 255 characters)
+        guard name.count <= 255 else {
             throw ProjectError.invalidArguments("Target name cannot exceed 255 characters")
         }
         
-        return targetName
+        // Check for path traversal attempts
+        guard !name.contains("../") && !name.contains("..\\") else {
+            throw ProjectError.invalidArguments("Target name cannot contain path traversal sequences")
+        }
+        
+        // Check for invalid characters that could cause issues
+        let invalidCharacters = CharacterSet(charactersIn: "<>:\"|?*")
+        guard name.rangeOfCharacter(from: invalidCharacters) == nil else {
+            throw ProjectError.invalidArguments("Target name contains invalid characters (<>:\"|?*)")
+        }
+        
+        // Check for control characters
+        guard name.rangeOfCharacter(from: .controlCharacters) == nil else {
+            throw ProjectError.invalidArguments("Target name cannot contain control characters")
+        }
+        
+        // Check for null bytes
+        guard !name.contains("\0") else {
+            throw ProjectError.invalidArguments("Target name cannot contain null bytes")
+        }
+    }
+    
+    /// Security validation for product names (public for use by commands)
+    static func validateProductNameSecurity(_ name: String) throws {
+        // Check for empty or whitespace-only names
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw ProjectError.invalidArguments("Product name cannot be empty or whitespace")
+        }
+        
+        // Check for reasonable length (max 255 characters)
+        guard name.count <= 255 else {
+            throw ProjectError.invalidArguments("Product name cannot exceed 255 characters")
+        }
+        
+        // Check for path traversal attempts
+        guard !name.contains("../") && !name.contains("..\\") else {
+            throw ProjectError.invalidArguments("Product name cannot contain path traversal sequences")
+        }
+        
+        // Check for invalid characters that could cause issues in file systems
+        let invalidCharacters = CharacterSet(charactersIn: "<>:\"|?*")
+        guard name.rangeOfCharacter(from: invalidCharacters) == nil else {
+            throw ProjectError.invalidArguments("Product name contains invalid characters (<>:\"|?*)")
+        }
+        
+        // Check for control characters
+        guard name.rangeOfCharacter(from: .controlCharacters) == nil else {
+            throw ProjectError.invalidArguments("Product name cannot contain control characters")
+        }
     }
     
     /// Common error message formatting

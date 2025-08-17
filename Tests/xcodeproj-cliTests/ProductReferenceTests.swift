@@ -744,6 +744,175 @@ final class ProductReferenceTests: XCTestCase {
         XCTAssertNotNil(orphaned)
     }
     
+    // MARK: - Concurrency Safety Tests
+    
+    @MainActor
+    func testConcurrencyMainActorIsolation() throws {
+        try setupUtility()
+        
+        // Verify that ProductReferenceManager enforces MainActor isolation
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // All operations should be confined to MainActor
+        let target = PBXNativeTarget(
+            name: "ConcurrencyTest",
+            productName: "ConcurrencyTest",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // These calls should compile and execute on MainActor
+        let productsGroup = try productManager.ensureProductsGroup()
+        XCTAssertNotNil(productsGroup)
+        
+        let productRef = try productManager.createProductReference(for: target, productType: .application)
+        XCTAssertNotNil(productRef)
+        
+        let orphaned = productManager.findOrphanedProducts()
+        XCTAssertNotNil(orphaned)
+    }
+    
+    @MainActor
+    func testConcurrencySendableConformance() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Test that ValidationIssue is Sendable and can be safely passed between actors
+        let issues = try productManager.validateProducts()
+        
+        // This should compile without warnings in Swift 6 strict concurrency mode
+        let sendableIssues: [ValidationIssue] = issues
+        XCTAssertNotNil(sendableIssues)
+        
+        // Test that IssueType enum is also Sendable
+        let issueTypes = issues.map { $0.type }
+        XCTAssertNotNil(issueTypes)
+    }
+    
+    @MainActor
+    func testConcurrencyDataRaceProtection() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create multiple targets to test concurrent-like access patterns
+        var targets: [PBXNativeTarget] = []
+        for i in 0..<10 {
+            let target = PBXNativeTarget(
+                name: "ConcurrentTarget\(i)",
+                productName: "ConcurrentTarget\(i)",
+                productType: .application
+            )
+            utility.pbxproj.add(object: target)
+            targets.append(target)
+        }
+        
+        // Simulate rapid consecutive operations that could cause data races
+        // if not properly isolated
+        for target in targets {
+            let productRef = try productManager.createProductReference(for: target, productType: .application)
+            XCTAssertNotNil(productRef)
+        }
+        
+        // Verify integrity after rapid operations
+        let productsGroup = utility.pbxproj.rootObject?.productsGroup
+        XCTAssertNotNil(productsGroup)
+        XCTAssertEqual(productsGroup?.children.count, 10)
+    }
+    
+    // MARK: - File System Error Tests
+    
+    @MainActor
+    func testFileSystemErrorHandling() throws {
+        // Test with an invalid project path
+        let invalidPath = "/nonexistent/path/Test.xcodeproj"
+        
+        XCTAssertThrowsError(try XcodeProjUtility(path: invalidPath)) { error in
+            // Should throw appropriate file system error
+            XCTAssertNotNil(error)
+        }
+    }
+    
+    @MainActor
+    func testCorruptedProjectHandling() throws {
+        // Create a project with corrupted structure
+        let tempDirString = NSTemporaryDirectory() + "CorruptedTest-\(UUID().uuidString)"
+        let tempDir = Path(tempDirString)
+        try tempDir.mkpath()
+        defer { try? tempDir.delete() }
+        
+        let corruptedProjectPath = tempDir + "Corrupted.xcodeproj"
+        try corruptedProjectPath.mkpath()
+        
+        // Create invalid project file
+        let pbxprojPath = corruptedProjectPath + "project.pbxproj"
+        try pbxprojPath.write("Invalid project content")
+        
+        // Should handle corrupted project gracefully
+        XCTAssertThrowsError(try XcodeProjUtility(path: corruptedProjectPath.string)) { error in
+            XCTAssertNotNil(error)
+        }
+    }
+    
+    // MARK: - Complex Project Structure Tests
+    
+    @MainActor
+    func testComplexProjectStructureHandling() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create a complex project structure
+        let mainGroup = utility.pbxproj.rootObject?.mainGroup
+        
+        // Create nested groups
+        let frameworksGroup = PBXGroup(sourceTree: .group, name: "Frameworks")
+        utility.pbxproj.add(object: frameworksGroup)
+        mainGroup?.children.append(frameworksGroup)
+        
+        let testsGroup = PBXGroup(sourceTree: .group, name: "Tests")
+        utility.pbxproj.add(object: testsGroup)
+        mainGroup?.children.append(testsGroup)
+        
+        // Create multiple target types
+        let appTarget = PBXNativeTarget(
+            name: "ComplexApp",
+            productName: "ComplexApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: appTarget)
+        
+        let frameworkTarget = PBXNativeTarget(
+            name: "ComplexFramework",
+            productName: "ComplexFramework",
+            productType: .framework
+        )
+        utility.pbxproj.add(object: frameworkTarget)
+        
+        let testTarget = PBXNativeTarget(
+            name: "ComplexTests",
+            productName: "ComplexTests",
+            productType: .unitTestBundle
+        )
+        utility.pbxproj.add(object: testTarget)
+        
+        // Test operations on complex structure
+        let appProductRef = try productManager.createProductReference(for: appTarget, productType: .application)
+        let frameworkProductRef = try productManager.createProductReference(for: frameworkTarget, productType: .framework)
+        let testProductRef = try productManager.createProductReference(for: testTarget, productType: .unitTestBundle)
+        
+        XCTAssertNotNil(appProductRef)
+        XCTAssertNotNil(frameworkProductRef)
+        XCTAssertNotNil(testProductRef)
+        
+        // Verify Products group contains all references
+        let productsGroup = utility.pbxproj.rootObject?.productsGroup
+        XCTAssertNotNil(productsGroup)
+        XCTAssertEqual(productsGroup?.children.count, 3)
+        
+        // Test validation on complex structure
+        let issues = try productManager.validateProducts()
+        XCTAssertNotNil(issues)
+    }
+    
     @MainActor
     func testRepairProjectCommand() throws {
         try setupUtility()

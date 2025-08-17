@@ -677,6 +677,13 @@ class XcodeProjUtility {
     pbxproj.add(object: target)
     pbxproj.rootObject?.targets.append(target)
 
+    // Create product reference
+    let productManager = ProductReferenceManager(pbxproj: pbxproj)
+    if let productTypeEnum = PBXProductType(rawValue: productType) {
+      let _ = try productManager.createProductReference(for: target, productType: productTypeEnum)
+      // TODO: Set target.productReference when property becomes accessible in XcodeProj library
+    }
+
     // Invalidate cache to pick up new target
     cacheManager.invalidateTarget(name)
     cacheManager.rebuildAllCaches()

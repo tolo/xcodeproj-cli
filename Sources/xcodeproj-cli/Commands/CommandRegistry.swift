@@ -87,6 +87,19 @@ struct CommandRegistry {
     EnableTestCoverageCommand.commandName: EnableTestCoverageCommand.execute,
     SetTestParallelCommand.commandName: SetTestParallelCommand.execute,
 
+    // Product Commands
+    "repair-product-references": { args, util in
+      try RepairProductReferencesCommand.execute(with: args, utility: util)
+    },
+    "validate-products": { args, util in
+      try ValidateProductsCommand.execute(with: args, utility: util)
+    },
+    "add-product-reference": { args, util in
+      try AddProductReferenceCommand.execute(with: args, utility: util)
+    },
+    "repair-project": { args, util in try RepairProjectCommand.execute(with: args, utility: util) },
+    "repair-targets": { args, util in try RepairTargetsCommand.execute(with: args, utility: util) },
+
     // Workspace Commands
     "create-workspace": CreateWorkspaceCommand.execute,
     "add-project-to-workspace": AddProjectToWorkspaceCommand.execute,
@@ -103,6 +116,7 @@ struct CommandRegistry {
     ListFilesCommand.commandName,
     ListTreeCommand.commandName,
     ListInvalidReferencesCommand.commandName,
+    "validate-products",
 
     // List Commands
     ListTargetsCommand.commandName,
@@ -175,6 +189,13 @@ struct CommandRegistry {
     AddSchemeTargetCommand.commandName: AddSchemeTargetCommand.printUsage,
     EnableTestCoverageCommand.commandName: EnableTestCoverageCommand.printUsage,
     SetTestParallelCommand.commandName: SetTestParallelCommand.printUsage,
+
+    // Product Commands
+    "repair-product-references": RepairProductReferencesCommand.printUsage,
+    "validate-products": ValidateProductsCommand.printUsage,
+    "add-product-reference": AddProductReferenceCommand.printUsage,
+    "repair-project": RepairProjectCommand.printUsage,
+    "repair-targets": RepairTargetsCommand.printUsage,
 
     // Workspace Commands
     "create-workspace": CreateWorkspaceCommand.printUsage,
@@ -347,6 +368,9 @@ struct CommandRegistry {
         name: ValidateCommand.commandName, description: ValidateCommand.description,
         category: .inspection),
       CommandMetadata(
+        name: ValidateProductsCommand.commandName, description: ValidateProductsCommand.description,
+        category: .inspection),
+      CommandMetadata(
         name: ListFilesCommand.commandName, description: ListFilesCommand.description,
         category: .inspection),
       CommandMetadata(
@@ -358,6 +382,20 @@ struct CommandRegistry {
       CommandMetadata(
         name: RemoveInvalidReferencesCommand.commandName,
         description: RemoveInvalidReferencesCommand.description, category: .inspection),
+      CommandMetadata(
+        name: RepairProductReferencesCommand.commandName,
+        description: RepairProductReferencesCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: AddProductReferenceCommand.commandName,
+        description: AddProductReferenceCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: RepairProjectCommand.commandName, description: RepairProjectCommand.description,
+        category: .inspection),
+      CommandMetadata(
+        name: RepairTargetsCommand.commandName, description: RepairTargetsCommand.description,
+        category: .inspection),
     ]
 
     // Path Commands

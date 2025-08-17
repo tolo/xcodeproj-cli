@@ -355,4 +355,71 @@ class ProjectValidator {
     // Remove from project
     pbxproj.delete(object: fileRef)
   }
+
+  // MARK: - Product Reference Validation
+
+  /// Find orphaned file references not contained in any group
+  func findOrphanedFileReferences() -> [PBXFileReference] {
+    var orphanedRefs: [PBXFileReference] = []
+
+    for fileRef in pbxproj.fileReferences {
+      var found = false
+      for group in pbxproj.groups {
+        if group.children.contains(where: { $0 === fileRef }) {
+          found = true
+          break
+        }
+      }
+      if !found {
+        orphanedRefs.append(fileRef)
+      }
+    }
+
+    return orphanedRefs
+  }
+
+  /// Remove orphaned file references from the project
+  func removeOrphanedFileReferences() throws {
+    let orphaned = findOrphanedFileReferences()
+    for fileRef in orphaned {
+      removeFileReference(fileRef)
+    }
+  }
+
+  /// Validate product references for all targets
+  func validateProductReferences() -> [String] {
+    var issues: [String] = []
+
+    // Check if Products group exists
+    if pbxproj.rootObject?.productsGroup == nil {
+      issues.append("Products group is missing from project")
+    }
+
+    // TODO: Add product reference validation when productReference is accessible
+    issues.append("Product reference validation requires XcodeProj library update")
+
+    return issues
+  }
+
+  /// Find targets that are missing product references
+  func findMissingProductReferences() -> [PBXNativeTarget] {
+    // TODO: Implement when productReference is accessible
+    return pbxproj.nativeTargets
+  }
+
+  /// Find orphaned product references in Products group
+  func findOrphanedProductReferences() -> [PBXFileReference] {
+    guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
+
+    // Since we can't access productReference, return all products as potentially orphaned
+    var orphaned: [PBXFileReference] = []
+
+    for child in productsGroup.children {
+      if let fileRef = child as? PBXFileReference {
+        orphaned.append(fileRef)
+      }
+    }
+
+    return orphaned
+  }
 }

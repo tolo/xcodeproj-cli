@@ -360,22 +360,19 @@ class ProjectValidator {
 
   /// Find orphaned file references not contained in any group
   func findOrphanedFileReferences() -> [PBXFileReference] {
-    var orphanedRefs: [PBXFileReference] = []
-
-    for fileRef in pbxproj.fileReferences {
-      var found = false
-      for group in pbxproj.groups {
-        if group.children.contains(where: { $0 === fileRef }) {
-          found = true
-          break
+    // Build a set of all file references that are children of groups for O(1) lookup
+    var referencedFiles = Set<PBXFileReference>()
+    
+    for group in pbxproj.groups {
+      for child in group.children {
+        if let fileRef = child as? PBXFileReference {
+          referencedFiles.insert(fileRef)
         }
       }
-      if !found {
-        orphanedRefs.append(fileRef)
-      }
     }
-
-    return orphanedRefs
+    
+    // Find orphaned references by checking against the set
+    return pbxproj.fileReferences.filter { !referencedFiles.contains($0) }
   }
 
   /// Remove orphaned file references from the project

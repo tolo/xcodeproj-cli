@@ -101,15 +101,8 @@ class ProductReferenceManager {
     guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
 
     // Since we can't access productReference, return all products as potentially orphaned
-    var orphaned: [PBXFileReference] = []
-
-    for child in productsGroup.children {
-      if let fileRef = child as? PBXFileReference {
-        orphaned.append(fileRef)
-      }
-    }
-
-    return orphaned
+    // Use compactMap for more efficient filtering
+    return productsGroup.children.compactMap { $0 as? PBXFileReference }
   }
 
   func removeOrphanedProducts() throws -> Int {
@@ -120,6 +113,11 @@ class ProductReferenceManager {
   func addProductReference(
     to target: PBXNativeTarget, productName: String? = nil, productType: PBXProductType? = nil
   ) throws {
+    // Validate product name if provided
+    if let name = productName {
+      try validateProductName(name)
+    }
+    
     let actualProductType = productType ?? target.productType ?? .application
 
     let productRef = try createProductReference(for: target, productType: actualProductType)
@@ -130,9 +128,7 @@ class ProductReferenceManager {
     }
 
     // TODO: Set target.productReference when property becomes accessible
-    print(
-      "⚠️  Product reference created but cannot be linked to target due to XcodeProj library limitations"
-    )
+    // Note: Product reference created but cannot be linked to target due to XcodeProj library limitations
   }
 
   func findMissingProductReferences() -> [PBXNativeTarget] {
@@ -174,7 +170,7 @@ class ProductReferenceManager {
           name: "Debug",
           buildSettings: [
             "PRODUCT_NAME": "$(TARGET_NAME)",
-            "SWIFT_VERSION": "5.0",
+            "SWIFT_VERSION": "6.0",
           ]
         )
         pbxproj.add(object: debugConfig)
@@ -183,7 +179,7 @@ class ProductReferenceManager {
           name: "Release",
           buildSettings: [
             "PRODUCT_NAME": "$(TARGET_NAME)",
-            "SWIFT_VERSION": "5.0",
+            "SWIFT_VERSION": "6.0",
           ]
         )
         pbxproj.add(object: releaseConfig)
@@ -205,6 +201,36 @@ class ProductReferenceManager {
     }
 
     return repaired
+  }
+  
+  // MARK: - Private Helper Methods
+  
+  private func validateProductName(_ name: String) throws {
+    // Check for empty or whitespace-only names
+    guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+      throw ProjectError.invalidArguments("Product name cannot be empty or whitespace")
+    }
+    
+    // Check for reasonable length (max 255 characters)
+    guard name.count <= 255 else {
+      throw ProjectError.invalidArguments("Product name cannot exceed 255 characters")
+    }
+    
+    // Check for path traversal attempts
+    guard !name.contains("../") && !name.contains("..\\") else {
+      throw ProjectError.invalidArguments("Product name cannot contain path traversal sequences")
+    }
+    
+    // Check for invalid characters that could cause issues in file systems
+    let invalidCharacters = CharacterSet(charactersIn: "<>:\"|?*")
+    guard name.rangeOfCharacter(from: invalidCharacters) == nil else {
+      throw ProjectError.invalidArguments("Product name contains invalid characters (<>:\"|?*)")
+    }
+    
+    // Check for control characters
+    guard name.rangeOfCharacter(from: .controlCharacters) == nil else {
+      throw ProjectError.invalidArguments("Product name cannot contain control characters")
+    }
   }
 }
 
@@ -272,8 +298,8 @@ extension PBXProductType {
   }
 }
 
-struct ValidationIssue {
-  enum IssueType {
+struct ValidationIssue: Sendable {
+  enum IssueType: Sendable {
     case missingProductReference
     case orphanedProductReference
     case missingProductsGroup

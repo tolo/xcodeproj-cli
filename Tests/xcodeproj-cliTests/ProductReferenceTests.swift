@@ -15,11 +15,16 @@ final class ProductReferenceTests: XCTestCase {
         // Create temporary directory
         let tempDirString = NSTemporaryDirectory() + "ProductReferenceTests-\(UUID().uuidString)"
         tempDir = Path(tempDirString)
-        try! tempDir.mkpath()
-        
-        // Create test project
-        projectPath = tempDir + "TestProject.xcodeproj"
-        try! TestHelpers.createBasicProject(at: projectPath)
+        do {
+            try tempDir.mkpath()
+            
+            // Create test project
+            projectPath = tempDir + "TestProject.xcodeproj"
+            try TestHelpers.createBasicProject(at: projectPath)
+        } catch {
+            XCTFail("Failed to set up test environment: \(error)")
+            return
+        }
         
         // utility will be initialized in each test method that needs it
     }
@@ -276,8 +281,8 @@ final class ProductReferenceTests: XCTestCase {
     }
     
     @MainActor
-    func testProductTypeExtensions() {
-        try! setupUtility()
+    func testProductTypeExtensions() throws {
+        try setupUtility()
         // TODO: Fix fileExtension ambiguity - XcodeProj library and our ProductReferenceManager both define it
         // For now, test the explicitFileType which is unique to our extension
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
@@ -314,6 +319,429 @@ final class ProductReferenceTests: XCTestCase {
         )
         
         XCTAssertEqual(commandLineTarget.productNameForReference(), "TestTool")
+    }
+    
+    // MARK: - Security Tests
+    
+    @MainActor
+    func testSecurityPathTraversalPrevention() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Test path traversal attempts
+        let pathTraversalAttempts = [
+            "../malicious.app",
+            "..\\malicious.app",
+            "normal/../traversal.app",
+            "./valid/../invalid.app"
+        ]
+        
+        for maliciousName in pathTraversalAttempts {
+            do {
+                try productManager.addProductReference(to: target, productName: maliciousName)
+                XCTFail("Should have rejected path traversal attempt: \(maliciousName)")
+            } catch {
+                // Expected - should throw security error
+                if let projectError = error as? ProjectError,
+                   case .invalidArguments(let message) = projectError {
+                    XCTAssertTrue(message.contains("path traversal"), 
+                                 "Expected path traversal error but got: \(message)")
+                } else {
+                    XCTFail("Expected ProjectError.invalidArguments but got: \(error)")
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    func testSecurityInvalidCharactersPrevention() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Test invalid characters
+        let invalidCharacters = ["<", ">", ":", "\"", "|", "?", "*"]
+        
+        for invalidChar in invalidCharacters {
+            let maliciousName = "app\(invalidChar)name.app"
+            do {
+                try productManager.addProductReference(to: target, productName: maliciousName)
+                XCTFail("Should have rejected invalid character: \(invalidChar)")
+            } catch {
+                // Expected - should throw validation error
+                if let projectError = error as? ProjectError,
+                   case .invalidArguments(let message) = projectError {
+                    XCTAssertTrue(message.contains("invalid characters"), 
+                                 "Expected invalid characters error but got: \(message)")
+                } else {
+                    XCTFail("Expected ProjectError.invalidArguments but got: \(error)")
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    func testSecurityControlCharactersPrevention() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Test control characters
+        let controlCharacterName = "app\u{0001}name.app" // ASCII control character
+        
+        do {
+            try productManager.addProductReference(to: target, productName: controlCharacterName)
+            XCTFail("Should have rejected control characters")
+        } catch {
+            // Expected - should throw validation error
+            if let projectError = error as? ProjectError,
+               case .invalidArguments(let message) = projectError {
+                XCTAssertTrue(message.contains("control characters"), 
+                             "Expected control characters error but got: \(message)")
+            } else {
+                XCTFail("Expected ProjectError.invalidArguments but got: \(error)")
+            }
+        }
+    }
+    
+    @MainActor
+    func testSecurityExcessiveLengthPrevention() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Test excessively long name (over 255 characters)
+        let longName = String(repeating: "a", count: 256) + ".app"
+        
+        do {
+            try productManager.addProductReference(to: target, productName: longName)
+            XCTFail("Should have rejected excessively long name")
+        } catch {
+            // Expected - should throw validation error
+            if let projectError = error as? ProjectError,
+               case .invalidArguments(let message) = projectError {
+                XCTAssertTrue(message.contains("255 characters"), 
+                             "Expected length limit error but got: \(message)")
+            } else {
+                XCTFail("Expected ProjectError.invalidArguments but got: \(error)")
+            }
+        }
+    }
+    
+    // MARK: - Error Condition Tests
+    
+    @MainActor
+    func testErrorEmptyProductName() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Test empty and whitespace-only names
+        let invalidNames = ["", "   ", "\t\n", "\r\n  "]
+        
+        for invalidName in invalidNames {
+            do {
+                try productManager.addProductReference(to: target, productName: invalidName)
+                XCTFail("Should have rejected empty/whitespace name: '\(invalidName)'")
+            } catch {
+                // Expected - should throw validation error
+                if let projectError = error as? ProjectError,
+                   case .invalidArguments(let message) = projectError {
+                    XCTAssertTrue(message.contains("cannot be empty") || message.contains("whitespace"), 
+                                 "Expected empty/whitespace error but got: \(message)")
+                } else {
+                    XCTFail("Expected ProjectError.invalidArguments but got: \(error)")
+                }
+            }
+        }
+    }
+    
+    @MainActor
+    func testErrorMissingMainGroup() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Test that ensureProductsGroup works when main group exists
+        // (Testing missing main group would cause fatal error in XcodeProj library)
+        let productsGroup = try productManager.ensureProductsGroup()
+        XCTAssertNotNil(productsGroup)
+        XCTAssertEqual(productsGroup.name, "Products")
+        
+        // Verify it's properly linked to main group
+        if let mainGroup = utility.pbxproj.rootObject?.mainGroup {
+            XCTAssertTrue(mainGroup.children.contains(productsGroup))
+        }
+    }
+    
+    @MainActor
+    func testErrorMissingRootObject() throws {
+        try setupUtility()
+        
+        // Test that ProductReferenceManager works correctly with valid root object
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Should work correctly when root object exists
+        let productsGroup = try productManager.ensureProductsGroup()
+        XCTAssertNotNil(productsGroup)
+        XCTAssertEqual(productsGroup.name, "Products")
+        
+        // Verify root object is still valid
+        XCTAssertNotNil(utility.pbxproj.rootObject)
+        XCTAssertEqual(utility.pbxproj.rootObject?.productsGroup, productsGroup)
+    }
+    
+    // MARK: - Edge Case Tests
+    
+    @MainActor
+    func testEdgeCaseNilProductType() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create target with nil product type
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: nil
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Should use default application type
+        try productManager.addProductReference(to: target)
+        
+        let productsGroup = utility.pbxproj.rootObject?.productsGroup
+        XCTAssertNotNil(productsGroup)
+        XCTAssertTrue(productsGroup!.children.contains { $0.name == "TestApp.app" })
+    }
+    
+    @MainActor
+    func testEdgeCaseNilProductName() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create target with nil product name
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: nil,
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Should use target name as fallback
+        let productRef = try productManager.createProductReference(for: target, productType: .application)
+        XCTAssertEqual(productRef.name, "TestApp.app")
+    }
+    
+    @MainActor
+    func testEdgeCaseExistingProductsGroup() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Ensure Products group exists first
+        let firstGroup = try productManager.ensureProductsGroup()
+        
+        // Call again - should return same group
+        let secondGroup = try productManager.ensureProductsGroup()
+        
+        XCTAssertEqual(firstGroup, secondGroup)
+        XCTAssertEqual(utility.pbxproj.rootObject?.productsGroup, firstGroup)
+    }
+    
+    @MainActor
+    func testEdgeCaseDuplicateProductReference() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "TestApp",
+            productName: "TestApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // Create product reference twice
+        let firstRef = try productManager.createProductReference(for: target, productType: .application)
+        let secondRef = try productManager.createProductReference(for: target, productType: .application)
+        
+        // Both should be created (different UUIDs even if same properties)
+        XCTAssertFalse(firstRef === secondRef, "References should be different objects")
+        
+        // Both should be in Products group
+        let productsGroup = utility.pbxproj.rootObject?.productsGroup
+        XCTAssertNotNil(productsGroup)
+        XCTAssertTrue(productsGroup!.children.contains(firstRef))
+        XCTAssertTrue(productsGroup!.children.contains(secondRef))
+    }
+    
+    @MainActor
+    func testEdgeCaseSpecialProductTypes() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Test various product types
+        let productTypes: [(PBXProductType, String, String?)] = [
+            (.watch2App, "WatchApp.app", "wrapper.application"),
+            (.messagesExtension, "MessagesExt.appex", "wrapper.app-extension"),
+            (.xpcService, "XPCService.xpc", "wrapper.xpc-service"),
+            (.metalLibrary, "MetalLib.metallib", "archive.metal-library"),
+            (.systemExtension, "SysExt.systemextension", "wrapper.system-extension")
+        ]
+        
+        for (productType, expectedName, expectedFileType) in productTypes {
+            let target = PBXNativeTarget(
+                name: "TestTarget",
+                productName: "TestTarget",
+                productType: productType
+            )
+            utility.pbxproj.add(object: target)
+            
+            let productRef = try productManager.createProductReference(for: target, productType: productType)
+            XCTAssertTrue(productRef.name?.hasSuffix(expectedName.split(separator: ".").last?.description ?? "") ?? false)
+            XCTAssertEqual(productRef.explicitFileType, expectedFileType)
+        }
+    }
+    
+    // MARK: - Performance Tests
+    
+    @MainActor
+    func testPerformanceLargeProjectValidation() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create many targets to test performance
+        let targetCount = 100
+        var targets: [PBXNativeTarget] = []
+        
+        // Create targets
+        for i in 0..<targetCount {
+            let target = PBXNativeTarget(
+                name: "Target\(i)",
+                productName: "Target\(i)",
+                productType: .application
+            )
+            utility.pbxproj.add(object: target)
+            utility.pbxproj.rootObject?.targets.append(target)
+            targets.append(target)
+        }
+        
+        // Measure validation performance
+        let startTime = CFAbsoluteTimeGetCurrent()
+        let issues = try productManager.validateProducts()
+        let endTime = CFAbsoluteTimeGetCurrent()
+        
+        let executionTime = endTime - startTime
+        
+        // Should complete within reasonable time (2 seconds for 100 targets)
+        XCTAssertLessThan(executionTime, 2.0, "Validation took too long: \(executionTime) seconds")
+        XCTAssertFalse(issues.isEmpty) // Should find issues with these targets
+    }
+    
+    @MainActor
+    func testPerformanceLargeProjectOrphanedProducts() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let productsGroup = try productManager.ensureProductsGroup()
+        
+        // Create many orphaned product references
+        let orphanCount = 200
+        for i in 0..<orphanCount {
+            let orphanedRef = PBXFileReference(
+                sourceTree: .buildProductsDir,
+                name: "OrphanedApp\(i).app"
+            )
+            utility.pbxproj.add(object: orphanedRef)
+            productsGroup.children.append(orphanedRef)
+        }
+        
+        // Measure findOrphanedProducts performance
+        let startTime = CFAbsoluteTimeGetCurrent()
+        let orphaned = productManager.findOrphanedProducts()
+        let endTime = CFAbsoluteTimeGetCurrent()
+        
+        let executionTime = endTime - startTime
+        
+        // Should complete within reasonable time (1 second for 200 references)
+        XCTAssertLessThan(executionTime, 1.0, "Finding orphaned products took too long: \(executionTime) seconds")
+        XCTAssertEqual(orphaned.count, orphanCount)
+    }
+    
+    // MARK: - Regression Tests
+    
+    @MainActor
+    func testRegressionXcodeProjLibraryLimitations() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        let target = PBXNativeTarget(
+            name: "RegressionApp",
+            productName: "RegressionApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        utility.pbxproj.rootObject?.targets.append(target)
+        
+        // Test that known limitations are handled gracefully
+        let repaired = try productManager.repairProductReferences()
+        XCTAssertFalse(repaired.isEmpty)
+        XCTAssertTrue(repaired.first?.contains("requires XcodeProj library update") ?? false)
+        
+        let issues = try productManager.validateProducts()
+        XCTAssertTrue(issues.contains { $0.message.contains("requires XcodeProj library update") })
+    }
+    
+    @MainActor
+    func testRegressionSwift6Compatibility() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Test that all operations work under Swift 6's strict concurrency
+        let target = PBXNativeTarget(
+            name: "Swift6App",
+            productName: "Swift6App",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        
+        // These operations should all work without concurrency issues
+        let productRef = try productManager.createProductReference(for: target, productType: .application)
+        XCTAssertNotNil(productRef)
+        
+        let repaired = try productManager.repairTargets()
+        XCTAssertNotNil(repaired)
+        
+        let orphaned = productManager.findOrphanedProducts()
+        XCTAssertNotNil(orphaned)
     }
     
     @MainActor

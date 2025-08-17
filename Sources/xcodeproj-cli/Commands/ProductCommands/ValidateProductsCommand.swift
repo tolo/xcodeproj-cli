@@ -78,13 +78,19 @@ class ValidateProductsCommand: Command {
   private static func extractTargetName(from message: String) -> String? {
     // Extract target name from message like "Target 'MyApp' is missing product reference"
     let pattern = #"Target '([^']+)' is missing product reference"#
-    guard let regex = try? NSRegularExpression(pattern: pattern),
-      let match = regex.firstMatch(in: message, range: NSRange(message.startIndex..., in: message)),
-      let range = Range(match.range(at: 1), in: message)
-    else {
+    
+    do {
+      let regex = try NSRegularExpression(pattern: pattern, options: [])
+      guard let match = regex.firstMatch(in: message, range: NSRange(message.startIndex..., in: message)),
+            match.numberOfRanges > 1,
+            let range = Range(match.range(at: 1), in: message) else {
+        return nil
+      }
+      return String(message[range])
+    } catch {
+      print("⚠️  Error creating regex pattern for target name extraction: \(error)")
       return nil
     }
-    return String(message[range])
   }
 
   static func printUsage() {

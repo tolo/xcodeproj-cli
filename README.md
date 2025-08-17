@@ -1,6 +1,6 @@
 # XcodeProj CLI
 
-A powerful command-line utility for manipulating Xcode project files (.xcodeproj) without requiring Xcode or Docker. Designed for both **human developers** and **AI coding assistants** (like Claude Code, GitHub Copilot, and other LLM-based tools) to automate Xcode project management.
+A powerful command-line utility for manipulating Xcode project files (.xcodeproj) without requiring Xcode or Docker. Designed for both **human developers** and **AI coding assistants** to automate Xcode project management.
 
 ## Acknowledgments
 

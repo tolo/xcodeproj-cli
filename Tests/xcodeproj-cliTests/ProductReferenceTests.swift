@@ -118,11 +118,15 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.rootObject?.targets.append(target1)
         utility.pbxproj.rootObject?.targets.append(target2)
         
-        // Repair product references
-        let repaired = try productManager.repairProductReferences()
-        
-        XCTAssertEqual(repaired.count, 2)
-        XCTAssertTrue(repaired.allSatisfy { $0.contains("requires XcodeProj library update") })
+        // Repair product references should now throw library limitation error
+        XCTAssertThrowsError(try productManager.repairProductReferences()) { error in
+            if let projectError = error as? ProjectError,
+               case .libraryLimitation(let message) = projectError {
+                XCTAssertTrue(message.contains("XcodeProj library v10.0+"))
+            } else {
+                XCTFail("Expected ProjectError.libraryLimitation")
+            }
+        }
     }
     
     @MainActor
@@ -143,7 +147,7 @@ final class ProductReferenceTests: XCTestCase {
         let issues = try productManager.validateProducts()
         
         XCTAssertFalse(issues.isEmpty)
-        XCTAssertTrue(issues.contains { $0.message.contains("requires XcodeProj library update") })
+        XCTAssertTrue(issues.contains { $0.message.contains("XcodeProj library v10.0+") })
     }
     
     @MainActor
@@ -205,13 +209,18 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target)
         utility.pbxproj.rootObject?.targets.append(target)
         
-        // Run repair command
+        // Run repair command - should throw library limitation
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        try RepairProductReferencesCommand.execute(with: args, utility: utility)
-        
-        // This should not throw as it's a simplified implementation
-        XCTAssertTrue(true) // Test passes if no exception
+        XCTAssertThrowsError(try RepairProductReferencesCommand.execute(with: args, utility: utility)) { error in
+            if let projectError = error as? ProjectError,
+               case .libraryLimitation(_) = projectError {
+                // Expected behavior - library limitation
+                XCTAssertTrue(true)
+            } else {
+                XCTFail("Expected ProjectError.libraryLimitation")
+            }
+        }
     }
     
     @MainActor
@@ -711,13 +720,18 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target)
         utility.pbxproj.rootObject?.targets.append(target)
         
-        // Test that known limitations are handled gracefully
-        let repaired = try productManager.repairProductReferences()
-        XCTAssertFalse(repaired.isEmpty)
-        XCTAssertTrue(repaired.first?.contains("requires XcodeProj library update") ?? false)
+        // Test that library limitations throw appropriate errors
+        XCTAssertThrowsError(try productManager.repairProductReferences()) { error in
+            if let projectError = error as? ProjectError,
+               case .libraryLimitation(let message) = projectError {
+                XCTAssertTrue(message.contains("XcodeProj library v10.0+"))
+            } else {
+                XCTFail("Expected ProjectError.libraryLimitation")
+            }
+        }
         
         let issues = try productManager.validateProducts()
-        XCTAssertTrue(issues.contains { $0.message.contains("requires XcodeProj library update") })
+        XCTAssertTrue(issues.contains { $0.message.contains("XcodeProj library v10.0+") })
     }
     
     @MainActor
@@ -925,13 +939,18 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target1)
         utility.pbxproj.rootObject?.targets.append(target1)
         
-        // Run repair project command
+        // Run repair project command - should throw library limitation
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        try RepairProjectCommand.execute(with: args, utility: utility)
-        
-        // Test passes if no exception is thrown
-        XCTAssertTrue(true)
+        XCTAssertThrowsError(try RepairProjectCommand.execute(with: args, utility: utility)) { error in
+            if let projectError = error as? ProjectError,
+               case .libraryLimitation(_) = projectError {
+                // Expected behavior - library limitation
+                XCTAssertTrue(true)
+            } else {
+                XCTFail("Expected ProjectError.libraryLimitation")
+            }
+        }
     }
 }
 

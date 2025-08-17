@@ -1,7 +1,7 @@
 ---
 name: architect-reviewer
-description: Use PROACTIVELY for omprehensive architectural review using modern practices including CUPID principles, clean architecture, dependency analysis, and anti-pattern detection. Reviews code changes for architectural integrity, ensuring sound patterns, proper layering, and joyful development experience. Use after structural changes, new services, API modifications, or major refactoring.
-model: sonnet
+description: Use PROACTIVELY for comprehensive architectural review using modern practices including CUPID principles, clean architecture, dependency analysis, and anti-pattern detection. Reviews code changes for architectural integrity, ensuring sound patterns, proper layering, and joyful development experience. Use after structural changes, new services, API modifications, or major refactoring.
+model: opus
 color: orange 
 ---
 

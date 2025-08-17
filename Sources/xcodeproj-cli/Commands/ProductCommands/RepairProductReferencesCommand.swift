@@ -58,9 +58,17 @@ class RepairProductReferencesCommand: Command {
     """
     Usage: repair-product-references [--dry-run] [--targets <targets>]
 
+    Automatically detects and fixes missing or broken product references in your Xcode project.
+    Product references link targets to their build outputs in the Products group.
+
     Options:
       --dry-run            Preview changes without applying them
       --targets <list>     Comma-separated list of specific targets to repair
+
+    Current Limitations:
+      • Requires XcodeProj library v10.0+ for full product reference linking
+      • Commands prepare project structure for future library compatibility
+      • Products group and references are created but target linking is limited
 
     Examples:
       repair-product-references

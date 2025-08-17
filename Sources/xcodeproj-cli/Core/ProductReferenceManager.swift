@@ -149,48 +149,14 @@ class ProductReferenceManager {
 
       // Add missing build phases if needed
       if target.buildPhases.isEmpty {
-        let sourcesBuildPhase = PBXSourcesBuildPhase()
-        pbxproj.add(object: sourcesBuildPhase)
-        target.buildPhases.append(sourcesBuildPhase)
-
-        let resourcesBuildPhase = PBXResourcesBuildPhase()
-        pbxproj.add(object: resourcesBuildPhase)
-        target.buildPhases.append(resourcesBuildPhase)
-
-        let frameworksBuildPhase = PBXFrameworksBuildPhase()
-        pbxproj.add(object: frameworksBuildPhase)
-        target.buildPhases.append(frameworksBuildPhase)
-
+        try addMissingBuildPhases(to: target)
         repaired.append("Added missing build phases to target '\(target.name)'")
         targetRepaired = true
       }
 
+      // Add missing build configurations if needed
       if target.buildConfigurationList == nil {
-        let debugConfig = XCBuildConfiguration(
-          name: "Debug",
-          buildSettings: [
-            "PRODUCT_NAME": "$(TARGET_NAME)",
-            "SWIFT_VERSION": "6.0",
-          ]
-        )
-        pbxproj.add(object: debugConfig)
-
-        let releaseConfig = XCBuildConfiguration(
-          name: "Release",
-          buildSettings: [
-            "PRODUCT_NAME": "$(TARGET_NAME)",
-            "SWIFT_VERSION": "6.0",
-          ]
-        )
-        pbxproj.add(object: releaseConfig)
-
-        let configList = XCConfigurationList(
-          buildConfigurations: [debugConfig, releaseConfig],
-          defaultConfigurationName: "Debug"
-        )
-        pbxproj.add(object: configList)
-
-        target.buildConfigurationList = configList
+        try addMissingBuildConfigurations(to: target)
         repaired.append("Added missing build configurations to target '\(target.name)'")
         targetRepaired = true
       }
@@ -203,7 +169,64 @@ class ProductReferenceManager {
     return repaired
   }
   
-  // MARK: - Private Helper Methods
+  // MARK: - Target Repair Helper Methods
+  
+  private func addMissingBuildPhases(to target: PBXNativeTarget) throws {
+    let sourcesBuildPhase = PBXSourcesBuildPhase()
+    pbxproj.add(object: sourcesBuildPhase)
+    target.buildPhases.append(sourcesBuildPhase)
+
+    let resourcesBuildPhase = PBXResourcesBuildPhase()
+    pbxproj.add(object: resourcesBuildPhase)
+    target.buildPhases.append(resourcesBuildPhase)
+
+    let frameworksBuildPhase = PBXFrameworksBuildPhase()
+    pbxproj.add(object: frameworksBuildPhase)
+    target.buildPhases.append(frameworksBuildPhase)
+  }
+  
+  private func addMissingBuildConfigurations(to target: PBXNativeTarget) throws {
+    let swiftVersion = getSwiftVersion()
+    
+    let debugConfig = XCBuildConfiguration(
+      name: "Debug",
+      buildSettings: [
+        "PRODUCT_NAME": .string("$(TARGET_NAME)"),
+        "SWIFT_VERSION": .string(swiftVersion),
+      ]
+    )
+    pbxproj.add(object: debugConfig)
+
+    let releaseConfig = XCBuildConfiguration(
+      name: "Release",
+      buildSettings: [
+        "PRODUCT_NAME": .string("$(TARGET_NAME)"),
+        "SWIFT_VERSION": .string(swiftVersion),
+      ]
+    )
+    pbxproj.add(object: releaseConfig)
+
+    let configList = XCConfigurationList(
+      buildConfigurations: [debugConfig, releaseConfig],
+      defaultConfigurationName: "Debug"
+    )
+    pbxproj.add(object: configList)
+
+    target.buildConfigurationList = configList
+  }
+  
+  private func getSwiftVersion() -> String {
+    // Try to detect from existing project first, fall back to current Swift version
+    if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
+       let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
+       case .string(let versionString) = existingVersion {
+      return versionString
+    }
+    // Default to Swift 6.0 for new configurations
+    return "6.0"
+  }
+  
+  // MARK: - Validation Helper Methods
   
   private func validateProductName(_ name: String) throws {
     // Check for empty or whitespace-only names

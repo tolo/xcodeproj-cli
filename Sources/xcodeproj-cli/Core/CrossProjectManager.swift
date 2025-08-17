@@ -232,7 +232,7 @@ class CrossProjectManager {
 
     for dep in target.dependencies {
       if let proxy = dep.targetProxy,
-        case let .fileReference(fileRef) = proxy.containerPortal
+        case .fileReference(let fileRef) = proxy.containerPortal
       {
         let projectName = fileRef.name ?? fileRef.path ?? "Unknown"
         let targetName = dep.name ?? proxy.remoteInfo ?? "Unknown"

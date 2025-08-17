@@ -362,7 +362,7 @@ class ProjectValidator {
   func findOrphanedFileReferences() -> [PBXFileReference] {
     // Build a set of all file references that are children of groups for O(1) lookup
     var referencedFiles = Set<PBXFileReference>()
-    
+
     for group in pbxproj.groups {
       for child in group.children {
         if let fileRef = child as? PBXFileReference {
@@ -370,7 +370,7 @@ class ProjectValidator {
         }
       }
     }
-    
+
     // Find orphaned references by checking against the set
     return pbxproj.fileReferences.filter { !referencedFiles.contains($0) }
   }

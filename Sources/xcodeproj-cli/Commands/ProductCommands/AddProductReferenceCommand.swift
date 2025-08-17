@@ -38,7 +38,8 @@ class AddProductReferenceCommand: Command {
 
     print("🔧 Adding product reference to target '\(targetName)'...")
 
-    let finalProductName = try ProductCommandBase.executeWithSave(with: arguments, utility: utility) { productManager in
+    let finalProductName = try ProductCommandBase.executeWithSave(with: arguments, utility: utility)
+    { productManager in
       try productManager.addProductReference(
         to: target, productName: productName, productType: productType)
       return productName ?? "\(targetName).app"

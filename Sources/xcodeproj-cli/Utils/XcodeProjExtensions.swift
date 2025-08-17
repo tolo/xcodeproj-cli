@@ -6,6 +6,7 @@ extension PBXNativeTarget {
   func productNameForReference() -> String? {
     guard let productType = self.productType else { return nil }
 
+    // Note: self.name is non-optional in XcodeProj library
     let baseName = self.productName ?? self.name
     let fileExt = productType.fileExtension
 

@@ -87,7 +87,7 @@ class ProductReferenceManager {
         )
       }
     }
-    
+
     // Note library limitation for full validation
     if !pbxproj.nativeTargets.isEmpty {
       issues.append(
@@ -105,8 +105,10 @@ class ProductReferenceManager {
     guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
 
     // Since we can't access productReference, return all products as potentially orphaned
-    // Use compactMap for more efficient filtering
-    return productsGroup.children.compactMap { $0 as? PBXFileReference }
+    // Use lazy evaluation for memory efficiency with large projects
+    return productsGroup.children.lazy
+      .compactMap { $0 as? PBXFileReference }
+      .filter { _ in true }  // Placeholder for future filtering when library supports it
   }
 
   func removeOrphanedProducts() throws -> Int {
@@ -118,11 +120,11 @@ class ProductReferenceManager {
   func addProductReference(
     to target: PBXNativeTarget, productName: String? = nil, productType: PBXProductType? = nil
   ) throws {
-    // Validate product name if provided
+    // Validate product name if provided using the shared validation
     if let name = productName {
-      try validateProductName(name)
+      try ProductCommandBase.validateProductNameSecurity(name)
     }
-    
+
     let actualProductType = productType ?? target.productType ?? .application
 
     let productRef = try createProductReference(for: target, productType: actualProductType)
@@ -139,16 +141,26 @@ class ProductReferenceManager {
   func findMissingProductReferences() -> [PBXNativeTarget] {
     // Current limitation: Cannot access productReference property
     // Return targets that likely need product references based on available data
-    return pbxproj.nativeTargets.filter { target in
-      // Heuristic: targets without Products group representation may need references
-      guard let productsGroup = pbxproj.rootObject?.productsGroup else { return true }
-      
-      let expectedProductName = target.productNameForReference() ?? "\(target.name).app"
-      let hasProductReference = productsGroup.children.contains { child in
-        child.name == expectedProductName || child.path == expectedProductName
+
+    // Early return if no products group
+    guard let productsGroup = pbxproj.rootObject?.productsGroup else {
+      return pbxproj.nativeTargets
+    }
+
+    // Build a set of existing product names for O(1) lookup
+    let existingProducts = Set(
+      productsGroup.children.lazy.flatMap { child -> [String] in
+        var names: [String] = []
+        if let name = child.name { names.append(name) }
+        if let path = child.path { names.append(path) }
+        return names
       }
-      
-      return !hasProductReference
+    )
+
+    // Filter targets using O(1) set lookup instead of O(m) array search
+    return pbxproj.nativeTargets.filter { target in
+      let expectedProductName = target.productNameForReference() ?? "\(target.name).app"
+      return !existingProducts.contains(expectedProductName)
     }
   }
 
@@ -184,9 +196,9 @@ class ProductReferenceManager {
 
     return repaired
   }
-  
+
   // MARK: - Target Repair Helper Methods
-  
+
   private func addMissingBuildPhases(to target: PBXNativeTarget) throws {
     let sourcesBuildPhase = PBXSourcesBuildPhase()
     pbxproj.add(object: sourcesBuildPhase)
@@ -200,10 +212,10 @@ class ProductReferenceManager {
     pbxproj.add(object: frameworksBuildPhase)
     target.buildPhases.append(frameworksBuildPhase)
   }
-  
+
   private func addMissingBuildConfigurations(to target: PBXNativeTarget) throws {
     let swiftVersion = getSwiftVersion()
-    
+
     let debugConfig = XCBuildConfiguration(
       name: "Debug",
       buildSettings: [
@@ -230,46 +242,17 @@ class ProductReferenceManager {
 
     target.buildConfigurationList = configList
   }
-  
+
   private func getSwiftVersion() -> String {
     // Try to detect from existing project first, fall back to current Swift version
     if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
-       let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
-       case .string(let versionString) = existingVersion {
+      let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
+      case .string(let versionString) = existingVersion
+    {
       return versionString
     }
     // Default to Swift 6.0 for new configurations
     return "6.0"
-  }
-  
-  // MARK: - Validation Helper Methods
-  
-  private func validateProductName(_ name: String) throws {
-    // Check for empty or whitespace-only names
-    guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-      throw ProjectError.invalidArguments("Product name cannot be empty or whitespace")
-    }
-    
-    // Check for reasonable length (max 255 characters)
-    guard name.count <= 255 else {
-      throw ProjectError.invalidArguments("Product name cannot exceed 255 characters")
-    }
-    
-    // Check for path traversal attempts
-    guard !name.contains("../") && !name.contains("..\\") else {
-      throw ProjectError.invalidArguments("Product name cannot contain path traversal sequences")
-    }
-    
-    // Check for invalid characters that could cause issues in file systems
-    let invalidCharacters = CharacterSet(charactersIn: "<>:\"|?*")
-    guard name.rangeOfCharacter(from: invalidCharacters) == nil else {
-      throw ProjectError.invalidArguments("Product name contains invalid characters (<>:\"|?*)")
-    }
-    
-    // Check for control characters
-    guard name.rangeOfCharacter(from: .controlCharacters) == nil else {
-      throw ProjectError.invalidArguments("Product name cannot contain control characters")
-    }
   }
 }
 

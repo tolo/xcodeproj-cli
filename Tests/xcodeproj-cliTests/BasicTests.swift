@@ -49,7 +49,7 @@ final class BasicTests: XCTestCase {
         
         TestHelpers.assertCommandSuccess(result, message: "Version command should succeed")
         TestHelpers.assertOutputContains(result.output, "xcodeproj-cli version")
-        TestHelpers.assertOutputContains(result.output, "2.2.1")
+        TestHelpers.assertOutputContains(result.output, "2.3.0")
     }
     
     func testVersionCommandShortFlag() throws {

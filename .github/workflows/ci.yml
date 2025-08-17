@@ -10,8 +10,10 @@ jobs:
   test:
     runs-on: macos-15  # Use macOS 15 (Sequoia) runner which should have Xcode 16
     
+    # Note: GitHub natively skips workflows with [skip ci], [ci skip], [no ci], 
+    # [skip actions], or [actions skip] in commit messages.
+    # This condition adds support for [WIP] in PR titles only.
     if: |
-      !contains(github.event.pull_request.title, '[skip-test]') &&
       !contains(github.event.pull_request.title, '[WIP]')
 
     steps:

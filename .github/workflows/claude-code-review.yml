@@ -16,8 +16,9 @@ jobs:
     # if: false # Remove this line to re-enable
 
     # Optional: Skip review for certain conditions
+    # Note: GitHub natively skips workflows with [skip ci] in commit messages.
+    # This adds custom skip patterns for PR titles.
     if: |
-      !contains(github.event.pull_request.title, '[skip-review]') &&
       !contains(github.event.pull_request.title, '[WIP]')
 
     # Optional: Filter by PR author

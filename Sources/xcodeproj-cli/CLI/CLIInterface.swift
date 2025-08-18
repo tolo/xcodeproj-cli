@@ -9,7 +9,7 @@ import Foundation
 
 /// Main CLI interface for xcodeproj-cli
 struct CLIInterface {
-  static let version = "2.2.1"
+  static let version = "2.3.0"
 
   @MainActor
   static func printUsage() {

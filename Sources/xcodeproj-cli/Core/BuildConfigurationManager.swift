@@ -389,13 +389,13 @@ class BuildConfigurationManager {
       return true
     case (nil, _), (_, nil):
       return false
-    case let (v1 as String, v2 as String):
+    case (let v1 as String, let v2 as String):
       return v1 == v2
-    case let (v1 as [String], v2 as [String]):
+    case (let v1 as [String], let v2 as [String]):
       return v1 == v2
-    case let (v1 as Bool, v2 as Bool):
+    case (let v1 as Bool, let v2 as Bool):
       return v1 == v2
-    case let (v1 as Int, v2 as Int):
+    case (let v1 as Int, let v2 as Int):
       return v1 == v2
     default:
       return String(describing: value1) == String(describing: value2)

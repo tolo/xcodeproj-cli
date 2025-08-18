@@ -544,7 +544,7 @@ class XcodeProjUtility {
     // Remove from build phases if needed
     for target in pbxproj.nativeTargets {
       // Remove from build phase membership exceptions if present
-      target.buildPhases.forEach { phase in
+      for phase in target.buildPhases {
         if let sourcePhase = phase as? PBXSourcesBuildPhase {
           sourcePhase.files?.removeAll { file in
             // Check if this build file is related to the sync group
@@ -676,6 +676,13 @@ class XcodeProjUtility {
 
     pbxproj.add(object: target)
     pbxproj.rootObject?.targets.append(target)
+
+    // Create product reference
+    let productManager = ProductReferenceManager(pbxproj: pbxproj)
+    if let productTypeEnum = PBXProductType(rawValue: productType) {
+      let _ = try productManager.createProductReference(for: target, productType: productTypeEnum)
+      // TODO: Set target.productReference when property becomes accessible in XcodeProj library
+    }
 
     // Invalidate cache to pick up new target
     cacheManager.invalidateTarget(name)
@@ -2643,7 +2650,9 @@ class XcodeProjUtility {
     let issues = validate()
     if !issues.isEmpty {
       print("⚠️  Validation issues found:")
-      issues.forEach { print("  - \($0)") }
+      for issue in issues {
+        print("  - \(issue)")
+      }
     }
 
     // Create backup for atomic write

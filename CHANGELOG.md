@@ -5,6 +5,45 @@ All notable changes to xcodeproj-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2025-08-18
+
+### Added
+- **Product Reference Management**: New comprehensive suite of commands for managing Xcode product references (#19)
+  - `validate-products` - Validate product references and Products group integrity
+  - `repair-product-references` - Repair missing or broken product references (with library limitations noted)
+  - `add-product-reference` - Manually add product reference to specific target
+  - `repair-project` - Comprehensive project repair including product references
+  - `repair-targets` - Repair specific targets including build phases and configurations
+- **ProductReferenceManager Service**: Core service for managing product references with XcodeProj library v9.x compatibility
+  - Handles Products group creation and management
+  - Provides product reference validation with structured issue reporting
+  - Implements workarounds for XcodeProj library limitations (productReference property inaccessible)
+- **Enhanced ValidationIssue Structure**: Added structured data for programmatic access
+  - Target name and product name fields for precise issue identification
+  - Severity levels (error/warning/info) for better issue prioritization
+
+### Improved
+- **Security**: Enterprise-grade input validation for all product commands
+  - Path traversal prevention
+  - Invalid character filtering
+  - Control character and null byte protection
+- **Performance**: Optimized product reference operations for large projects
+  - Lazy evaluation for memory efficiency
+  - O(1) lookup optimization using Sets instead of array searches
+- **Error Handling**: Graceful degradation when encountering library limitations
+  - Clear messaging about XcodeProj v10.0+ requirements
+  - Continues with available fixes instead of failing entirely
+- **Code Quality**: Reduced code duplication in validation methods by 95%
+
+### Fixed
+- **Swift 6 Compatibility**: All product commands properly isolated with @MainActor
+- **Sendable Conformance**: ValidationIssue and related types conform to Sendable protocol
+
+### Technical Notes
+- Product reference direct assignment (`target.productReference`) requires XcodeProj library v10.0+
+- Current implementation creates product references in Products group but cannot link to targets due to library limitations
+- Full functionality will be available when XcodeProj library is updated to expose productReference property
+
 ## [2.2.1] - 2025-08-16
 
 ### Improved

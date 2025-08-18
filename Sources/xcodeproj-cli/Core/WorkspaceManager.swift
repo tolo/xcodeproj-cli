@@ -98,8 +98,8 @@ class WorkspaceManager {
 
     // Check if project already exists in workspace
     for child in workspace.data.children {
-      if case let .file(ref) = child {
-        if case let .group(path) = ref.location, path == validatedProjectPath {
+      if case .file(let ref) = child {
+        if case .group(let path) = ref.location, path == validatedProjectPath {
           print("⚠️  Project '\(validatedProjectPath)' already exists in workspace")
           return
         }
@@ -137,8 +137,8 @@ class WorkspaceManager {
     // Find and remove the project
     var found = false
     workspace.data.children.removeAll { child in
-      if case let .file(ref) = child {
-        if case let .group(path) = ref.location {
+      if case .file(let ref) = child {
+        if case .group(let path) = ref.location {
           // Use proper path comparison instead of fragile string matching
           let normalizedRefPath = (path as NSString).standardizingPath
           let normalizedProjectPath = (validatedProjectPath as NSString).standardizingPath
@@ -187,16 +187,16 @@ class WorkspaceManager {
       var projects: [String] = []
 
       for child in workspace.data.children {
-        if case let .file(ref) = child {
-          if case let .group(path) = ref.location {
+        if case .file(let ref) = child {
+          if case .group(let path) = ref.location {
             if !path.isEmpty {
               projects.append(path)
             }
-          } else if case let .absolute(path) = ref.location {
+          } else if case .absolute(let path) = ref.location {
             projects.append(path)
-          } else if case let .developer(path) = ref.location {
+          } else if case .developer(let path) = ref.location {
             projects.append("Developer:\(path)")
-          } else if case let .container(path) = ref.location {
+          } else if case .container(let path) = ref.location {
             projects.append("Container:\(path)")
           }
         }

@@ -43,6 +43,10 @@ enum ProjectError: Error, CustomStringConvertible {
   case transactionNotActive
   case transactionAlreadyActive
 
+  // Feature availability errors
+  case featureNotAvailable(String)
+  case libraryLimitation(String)
+
   var description: String {
     switch self {
     case .fileAlreadyExists(let path):
@@ -96,6 +100,11 @@ enum ProjectError: Error, CustomStringConvertible {
       return "No active transaction. Begin a transaction first."
     case .transactionAlreadyActive:
       return "Transaction already active. Commit or rollback the current transaction first."
+
+    case .featureNotAvailable(let msg):
+      return "Feature not available: \(msg)"
+    case .libraryLimitation(let msg):
+      return "Library limitation: \(msg)"
     }
   }
 }

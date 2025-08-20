@@ -7,27 +7,58 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9BB51926BC5467A01989BBCF /* Developer in Resources */ = {isa = PBXBuildFile; fileRef = 97999C7740011E276CD5ACA5 /* Developer */; };
+		A1234567890123456789013A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013B /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		97999C7740011E276CD5ACA5 /* Developer */ = {isa = PBXFileReference; lastKnownFileType = text; path = Developer; sourceTree = "<group>"; };
+		A1234567890123456789013B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		A1234567890123456789013C /* TestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A1234567890123456789013D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		A1234567890123456789012A /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				A1234567890123456789013C /* TestApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1234567890123456789012B /* TestProject */ = {
+		A1234567890123456789012B = {
 			isa = PBXGroup;
 			children = (
 				A1234567890123456789012A /* Products */,
+				A1234567890123456789013E /* Sources */,
+				A1234567890123456789013F /* Resources */,
 			);
+			sourceTree = "<group>";
+		};
+		A1234567890123456789013E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A1234567890123456789013B /* AppDelegate.swift */,
+				97999C7740011E276CD5ACA5 /* Developer */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A1234567890123456789013F /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -37,6 +68,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = A1234567890123456789012D /* Build configuration list for PBXNativeTarget "TestApp" */;
 			buildPhases = (
+				A123456789012345678901A1 /* Sources */,
+				A1234567890123456789013D /* Frameworks */,
+				A123456789012345678901A2 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -44,6 +78,7 @@
 			);
 			name = TestApp;
 			productName = TestApp;
+			productReference = A1234567890123456789013C /* TestApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -67,7 +102,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = A1234567890123456789012B /* TestProject */;
+			mainGroup = A1234567890123456789012B;
 			productRefGroup = A1234567890123456789012A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -76,6 +111,28 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A123456789012345678901A2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9BB51926BC5467A01989BBCF /* Developer in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A123456789012345678901A1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1234567890123456789013A /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		A123456789012345678901210 /* Debug */ = {
@@ -154,16 +211,24 @@
 		A123456789012345678901212 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_IDENTIFIER = "com.test.TestApp";
+				BUNDLE_IDENTIFIER = com.test.TestApp;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = ABC123XYZ;
+				PRODUCT_BUNDLE_IDENTIFIER = com.test.TestApp;
+				PRODUCT_NAME = MyApp;
+				SWIFT_VERSION = 5.9;
 			};
 			name = Debug;
 		};
 		A123456789012345678901213 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				BUNDLE_IDENTIFIER = "com.test.TestApp";
+				BUNDLE_IDENTIFIER = com.test.TestApp;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = ABC123XYZ;
+				PRODUCT_BUNDLE_IDENTIFIER = com.test.TestApp;
+				PRODUCT_NAME = MyApp;
+				SWIFT_VERSION = 5.9;
 			};
 			name = Release;
 		};

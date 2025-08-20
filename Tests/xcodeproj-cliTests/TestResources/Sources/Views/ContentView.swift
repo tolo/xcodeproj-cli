@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        Text("Hello, World!")
-    }
+  var body: some View {
+    Text("Hello, World!")
+  }
 }

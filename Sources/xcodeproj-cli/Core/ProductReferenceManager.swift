@@ -57,10 +57,29 @@ class ProductReferenceManager {
   func repairProductReferences(dryRun: Bool = false, targetNames: [String]? = nil) throws
     -> [String]
   {
-    // Current implementation limited by XcodeProj library's internal productReference property
-    throw ProjectError.libraryLimitation(
-      "Product reference repair requires XcodeProj library v10.0+. Current functionality creates Products group and references but cannot link to targets. Use 'validate-products' to check project structure."
-    )
+    var repaired: [String] = []
+
+    // Ensure Products group exists
+    let _ = try ensureProductsGroup()
+
+    // Find targets missing product references
+    let targetsToRepair = pbxproj.nativeTargets.filter { target in
+      if let targetNames = targetNames, !targetNames.contains(target.name) {
+        return false
+      }
+      return target.product == nil && target.productType != nil
+    }
+
+    for target in targetsToRepair {
+      if !dryRun {
+        // Create and link product reference
+        let productRef = try createProductReference(for: target, productType: target.productType!)
+        target.product = productRef
+      }
+      repaired.append("Repaired product reference for target '\(target.name)'")
+    }
+
+    return repaired
   }
 
   func validateProducts() throws -> [ValidationIssue] {
@@ -91,15 +110,18 @@ class ProductReferenceManager {
       }
     }
 
-    // Note library limitation for full validation
-    if !pbxproj.nativeTargets.isEmpty {
-      issues.append(
-        ValidationIssue(
-          type: .missingProductReference,
-          message: "Complete product reference validation requires XcodeProj library v10.0+",
-          severity: .info
+    // Check for missing product references
+    for target in pbxproj.nativeTargets {
+      if target.product == nil && target.productType != nil {
+        issues.append(
+          ValidationIssue(
+            type: .missingProductReference,
+            message: "Target '\(target.name)' missing product reference",
+            targetName: target.name,
+            severity: .error
+          )
         )
-      )
+      }
     }
 
     return issues
@@ -108,21 +130,31 @@ class ProductReferenceManager {
   func findOrphanedProducts() -> [PBXFileReference] {
     guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
 
-    // Since we can't access productReference, return all products as potentially orphaned
-    // Use lazy evaluation for memory efficiency with large projects
+    // Build set of all products referenced by targets for O(1) lookup
+    let referencedProducts = Set(pbxproj.nativeTargets.compactMap { $0.product })
+
+    // Find products in Products group that aren't referenced by any target
     return productsGroup.children.lazy
       .compactMap { $0 as? PBXFileReference }
-      // NOTE: The filter { _ in true } is intentionally a no-op placeholder.
-      // When XcodeProj library v10.0+ provides access to productReference,
-      // this will be replaced with actual orphan detection logic:
-      // .filter { !isReferencedByAnyTarget($0) }
-      .filter { _ in true }
+      .filter { !referencedProducts.contains($0) }
   }
 
   func removeOrphanedProducts() throws -> Int {
-    throw ProjectError.libraryLimitation(
-      "Orphaned product removal requires XcodeProj library v10.0+ for productReference access. Use manual cleanup through Xcode or wait for library update."
-    )
+    guard let productsGroup = pbxproj.rootObject?.productsGroup else { return 0 }
+
+    let orphanedProducts = findOrphanedProducts()
+    let count = orphanedProducts.count
+
+    for product in orphanedProducts {
+      // Remove from Products group
+      if let index = productsGroup.children.firstIndex(of: product) {
+        productsGroup.children.remove(at: index)
+      }
+      // Remove from pbxproj objects
+      pbxproj.delete(object: product)
+    }
+
+    return count
   }
 
   func addProductReference(
@@ -142,33 +174,14 @@ class ProductReferenceManager {
       productRef.path = customName
     }
 
-    // Library limitation: Cannot set target.productReference due to internal property access
-    // Reference created in Products group but target linking requires XcodeProj library v10.0+
+    // Link the product reference to the target
+    target.product = productRef
   }
 
   func findMissingProductReferences() -> [PBXNativeTarget] {
-    // Current limitation: Cannot access productReference property
-    // Return targets that likely need product references based on available data
-
-    // Early return if no products group
-    guard let productsGroup = pbxproj.rootObject?.productsGroup else {
-      return pbxproj.nativeTargets
-    }
-
-    // Build a set of existing product names for O(1) lookup
-    let existingProducts = Set(
-      productsGroup.children.lazy.flatMap { child -> [String] in
-        var names: [String] = []
-        if let name = child.name { names.append(name) }
-        if let path = child.path { names.append(path) }
-        return names
-      }
-    )
-
-    // Filter targets using O(1) set lookup instead of O(m) array search
+    // Return targets that don't have a product reference but should have one
     return pbxproj.nativeTargets.filter { target in
-      let expectedProductName = target.productNameForReference() ?? "\(target.name).app"
-      return !existingProducts.contains(expectedProductName)
+      target.product == nil && target.productType != nil
     }
   }
 

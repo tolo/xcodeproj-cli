@@ -88,9 +88,9 @@ class RepairProjectCommand: Command {
       for target in targetsWithoutProducts {
         if !dryRun {
           if let productType = target.productType {
-            let _ = try productManager.createProductReference(for: target, productType: productType)
-            // NOTE: Cannot set target.productReference directly due to XcodeProj library v9.x limitation.
-            // The property is internal/inaccessible. Will be addressed when library v10.0+ is available.
+            let productRef = try productManager.createProductReference(
+              for: target, productType: productType)
+            target.product = productRef
           }
         }
         let message = "Fixed target-product association for '\(target.name)'"

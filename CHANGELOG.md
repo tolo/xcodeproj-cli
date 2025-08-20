@@ -5,19 +5,41 @@ All notable changes to xcodeproj-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.1] - 2025-08-20
+
+### Fixed
+- **Critical: Full Product Reference Management Now Works!** - Discovered that XcodeProj v9.4.3 already provides full access to product references
+  - The public `target.product` property was available all along (misconception about needing v10.0+ was incorrect)
+  - Fixed `repairProductReferences()` to properly link product references to targets using `target.product = productRef`
+  - Fixed `findOrphanedProducts()` to accurately detect orphaned products by checking `target.product` references
+  - Implemented working `removeOrphanedProducts()` that properly cleans up unreferenced products
+  - Updated `addTarget()` and `duplicateTarget()` to automatically create and link product references
+  - Enhanced `removeTarget()` to clean up associated product references from Products group
+
+### Improved
+- **Product Reference Validation**: Now accurately validates product references using the accessible `target.product` property
+  - `validateProducts()` properly checks for missing product references
+  - `findMissingProductReferences()` returns only targets that actually lack product references
+  - `findOrphanedProductReferences()` uses Set-based lookup for O(1) performance
+- **Code Quality**: Removed all incorrect error messages and comments about XcodeProj v10.0+ requirements
+
+### Technical Note
+- The confusion arose because `productReference` property is internal, but the public `product` computed property provides full read/write access
+- This is a common Swift pattern for reference management that was misunderstood in the initial implementation
+
 ## [2.3.0] - 2025-08-18
 
 ### Added
 - **Product Reference Management**: New comprehensive suite of commands for managing Xcode product references (#19)
   - `validate-products` - Validate product references and Products group integrity
-  - `repair-product-references` - Repair missing or broken product references (with library limitations noted)
+  - `repair-product-references` - Repair missing or broken product references
   - `add-product-reference` - Manually add product reference to specific target
   - `repair-project` - Comprehensive project repair including product references
   - `repair-targets` - Repair specific targets including build phases and configurations
-- **ProductReferenceManager Service**: Core service for managing product references with XcodeProj library v9.x compatibility
+- **ProductReferenceManager Service**: Core service for managing product references with full functionality
   - Handles Products group creation and management
   - Provides product reference validation with structured issue reporting
-  - Implements workarounds for XcodeProj library limitations (productReference property inaccessible)
+  - Full implementation working with XcodeProj v9.4.3
 - **Enhanced ValidationIssue Structure**: Added structured data for programmatic access
   - Target name and product name fields for precise issue identification
   - Severity levels (error/warning/info) for better issue prioritization
@@ -30,9 +52,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Performance**: Optimized product reference operations for large projects
   - Lazy evaluation for memory efficiency
   - O(1) lookup optimization using Sets instead of array searches
-- **Error Handling**: Graceful degradation when encountering library limitations
-  - Clear messaging about XcodeProj v10.0+ requirements
-  - Continues with available fixes instead of failing entirely
+- **Error Handling**: Full functionality available with comprehensive error reporting
+  - All product reference operations work with XcodeProj v9.4.3
+  - All fixes work properly with complete functionality
 - **Code Quality**: Reduced code duplication in validation methods by 95%
 
 ### Fixed
@@ -40,9 +62,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Sendable Conformance**: ValidationIssue and related types conform to Sendable protocol
 
 ### Technical Notes
-- Product reference direct assignment (`target.productReference`) requires XcodeProj library v10.0+
-- Current implementation creates product references in Products group but cannot link to targets due to library limitations
-- Full functionality will be available when XcodeProj library is updated to expose productReference property
+- Product reference direct assignment works with XcodeProj library v9.4.3
+- Implementation creates product references in Products group and links them to targets
+- Full functionality is available with current library version
 
 ## [2.2.1] - 2025-08-16
 

@@ -45,7 +45,6 @@ enum ProjectError: Error, CustomStringConvertible {
 
   // Feature availability errors
   case featureNotAvailable(String)
-  case libraryLimitation(String)
 
   var description: String {
     switch self {
@@ -103,8 +102,6 @@ enum ProjectError: Error, CustomStringConvertible {
 
     case .featureNotAvailable(let msg):
       return "Feature not available: \(msg)"
-    case .libraryLimitation(let msg):
-      return "Library limitation: \(msg)"
     }
   }
 }

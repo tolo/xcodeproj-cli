@@ -392,27 +392,36 @@ class ProjectValidator {
       issues.append("Products group is missing from project")
     }
 
-    // TODO: Add product reference validation when productReference is accessible
-    issues.append("Product reference validation requires XcodeProj library update")
+    // Check for missing product references
+    for target in pbxproj.nativeTargets {
+      if target.product == nil && target.productType != nil {
+        issues.append("Target '\(target.name)' is missing a product reference")
+      }
+    }
 
     return issues
   }
 
   /// Find targets that are missing product references
   func findMissingProductReferences() -> [PBXNativeTarget] {
-    // TODO: Implement when productReference is accessible
-    return pbxproj.nativeTargets
+    return pbxproj.nativeTargets.filter { target in
+      target.product == nil && target.productType != nil
+    }
   }
 
   /// Find orphaned product references in Products group
   func findOrphanedProductReferences() -> [PBXFileReference] {
     guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
 
-    // Since we can't access productReference, return all products as potentially orphaned
-    var orphaned: [PBXFileReference] = []
+    // Build set of all products referenced by targets
+    let referencedProducts = Set(pbxproj.nativeTargets.compactMap { $0.product })
 
+    // Find products in Products group that aren't referenced by any target
+    var orphaned: [PBXFileReference] = []
     for child in productsGroup.children {
-      if let fileRef = child as? PBXFileReference {
+      if let fileRef = child as? PBXFileReference,
+        !referencedProducts.contains(fileRef)
+      {
         orphaned.append(fileRef)
       }
     }

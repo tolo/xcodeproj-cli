@@ -631,18 +631,19 @@ class XcodeProjUtility {
     }
 
     // Create build configurations
+    let swiftVersion = getSwiftVersion()
     let debugConfig = XCBuildConfiguration(name: "Debug")
     debugConfig.buildSettings = [
       "BUNDLE_IDENTIFIER": .string(bundleId),
       "PRODUCT_NAME": .string("$(TARGET_NAME)"),
-      "SWIFT_VERSION": .string("5.0"),
+      "SWIFT_VERSION": .string(swiftVersion),
     ]
 
     let releaseConfig = XCBuildConfiguration(name: "Release")
     releaseConfig.buildSettings = [
       "BUNDLE_IDENTIFIER": .string(bundleId),
       "PRODUCT_NAME": .string("$(TARGET_NAME)"),
-      "SWIFT_VERSION": .string("5.0"),
+      "SWIFT_VERSION": .string(swiftVersion),
     ]
 
     pbxproj.add(object: debugConfig)
@@ -677,11 +678,12 @@ class XcodeProjUtility {
     pbxproj.add(object: target)
     pbxproj.rootObject?.targets.append(target)
 
-    // Create product reference
+    // Create and link product reference
     let productManager = ProductReferenceManager(pbxproj: pbxproj)
     if let productTypeEnum = PBXProductType(rawValue: productType) {
-      let _ = try productManager.createProductReference(for: target, productType: productTypeEnum)
-      // TODO: Set target.productReference when property becomes accessible in XcodeProj library
+      let productRef = try productManager.createProductReference(
+        for: target, productType: productTypeEnum)
+      target.product = productRef
     }
 
     // Invalidate cache to pick up new target
@@ -758,6 +760,14 @@ class XcodeProjUtility {
     pbxproj.add(object: newTarget)
     pbxproj.rootObject?.targets.append(newTarget)
 
+    // Create and link product reference for the duplicated target
+    if let productType = newTarget.productType {
+      let productManager = ProductReferenceManager(pbxproj: pbxproj)
+      let productRef = try productManager.createProductReference(
+        for: newTarget, productType: productType)
+      newTarget.product = productRef
+    }
+
     // Invalidate cache to pick up new target
     cacheManager.invalidateTarget(newName)
     cacheManager.rebuildAllCaches()
@@ -768,6 +778,15 @@ class XcodeProjUtility {
   func removeTarget(name: String) throws {
     guard let target = cacheManager.getTarget(name) else {
       throw ProjectError.targetNotFound(name)
+    }
+
+    // Remove product reference from Products group if it exists
+    if let product = target.product,
+      let productsGroup = pbxproj.rootObject?.productsGroup,
+      let index = productsGroup.children.firstIndex(of: product)
+    {
+      productsGroup.children.remove(at: index)
+      pbxproj.delete(object: product)
     }
 
     // Remove from project targets
@@ -2685,5 +2704,19 @@ class XcodeProjUtility {
       }
       throw error
     }
+  }
+
+  // MARK: - Helper Methods
+  
+  private func getSwiftVersion() -> String {
+    // Try to detect from existing project first, fall back to current Swift version
+    if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
+      let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
+      case .string(let versionString) = existingVersion
+    {
+      return versionString
+    }
+    // Default to Swift 6.0 for new configurations
+    return "6.0"
   }
 }

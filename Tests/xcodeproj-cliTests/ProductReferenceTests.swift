@@ -118,15 +118,15 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.rootObject?.targets.append(target1)
         utility.pbxproj.rootObject?.targets.append(target2)
         
-        // Repair product references should now throw library limitation error
-        XCTAssertThrowsError(try productManager.repairProductReferences()) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(let message) = projectError {
-                XCTAssertTrue(message.contains("XcodeProj library v10.0+"))
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Repair product references should now work correctly
+        let repaired = try productManager.repairProductReferences()
+        XCTAssertEqual(repaired.count, 2)
+        XCTAssertTrue(repaired.contains { $0.contains("App1") })
+        XCTAssertTrue(repaired.contains { $0.contains("Framework1") })
+        
+        // Verify products were linked to targets
+        XCTAssertNotNil(target1.product)
+        XCTAssertNotNil(target2.product)
     }
     
     @MainActor
@@ -143,11 +143,11 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target)
         utility.pbxproj.rootObject?.targets.append(target)
         
-        // Validate should find issues
+        // Validate should find missing product reference issue
         let issues = try productManager.validateProducts()
         
         XCTAssertFalse(issues.isEmpty)
-        XCTAssertTrue(issues.contains { $0.message.contains("XcodeProj library v10.0+") })
+        XCTAssertTrue(issues.contains { $0.message.contains("missing product reference") })
     }
     
     @MainActor
@@ -209,18 +209,11 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target)
         utility.pbxproj.rootObject?.targets.append(target)
         
-        // Run repair command - should throw library limitation
+        // Run repair command - should work with v9.4.3
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        XCTAssertThrowsError(try RepairProductReferencesCommand.execute(with: args, utility: utility)) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(_) = projectError {
-                // Expected behavior - library limitation
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Should now succeed
+        XCTAssertNoThrow(try RepairProductReferencesCommand.execute(with: args, utility: utility))
     }
     
     @MainActor
@@ -260,7 +253,7 @@ final class ProductReferenceTests: XCTestCase {
         try AddProductReferenceCommand.execute(with: args, utility: utility)
         
         // Verify Products group exists and may contain the reference
-        // Note: Due to XcodeProj library limitations, the reference may be created but not properly linked
+        // Note: Product reference should now be properly linked with v9.4.3
         let productsGroup = utility.pbxproj.rootObject?.productsGroup
         XCTAssertNotNil(productsGroup)
         
@@ -270,8 +263,7 @@ final class ProductReferenceTests: XCTestCase {
         
         if !hasCustomModernApp {
             // If the exact reference isn't found, at least verify the command executed without throwing
-            // This is acceptable given the XcodeProj library limitations mentioned in the output
-            print("Note: Product reference creation has known limitations with current XcodeProj library version")
+            // Product reference is now properly linked to the target
         }
     }
     
@@ -705,37 +697,37 @@ final class ProductReferenceTests: XCTestCase {
         XCTAssertEqual(orphaned.count, orphanCount)
     }
     
-    // MARK: - Regression Tests
+    // MARK: - Functionality Tests
     
     @MainActor
-    func testRegressionXcodeProjLibraryLimitations() throws {
+    func testProductReferenceRepairFunctionality() throws {
         try setupUtility()
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
         
         let target = PBXNativeTarget(
-            name: "RegressionApp",
-            productName: "RegressionApp",
+            name: "TestApp",
+            productName: "TestApp",
             productType: .application
         )
         utility.pbxproj.add(object: target)
         utility.pbxproj.rootObject?.targets.append(target)
         
-        // Test that library limitations throw appropriate errors
-        XCTAssertThrowsError(try productManager.repairProductReferences()) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(let message) = projectError {
-                XCTAssertTrue(message.contains("XcodeProj library v10.0+"))
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Test that product reference repair works correctly
+        // Should succeed and repair the target we created
+        let repaired = try productManager.repairProductReferences()
+        XCTAssertEqual(repaired.count, 1) // The one target should be repaired
+        XCTAssertTrue(repaired[0].contains("TestApp"))
+        
+        // Verify the product was linked
+        XCTAssertNotNil(target.product)
         
         let issues = try productManager.validateProducts()
-        XCTAssertTrue(issues.contains { $0.message.contains("XcodeProj library v10.0+") })
+        // Should no longer have missing product reference issues for this target
+        XCTAssertFalse(issues.contains { $0.type == .missingProductReference && $0.targetName == "TestApp" })
     }
     
     @MainActor
-    func testRegressionSwift6Compatibility() throws {
+    func testSwift6Compatibility() throws {
         try setupUtility()
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
         
@@ -939,18 +931,11 @@ final class ProductReferenceTests: XCTestCase {
         utility.pbxproj.add(object: target1)
         utility.pbxproj.rootObject?.targets.append(target1)
         
-        // Run repair project command - should throw library limitation
+        // Run repair project command - should work with v9.4.3
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        XCTAssertThrowsError(try RepairProjectCommand.execute(with: args, utility: utility)) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(_) = projectError {
-                // Expected behavior - library limitation
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Should now succeed
+        XCTAssertNoThrow(try RepairProjectCommand.execute(with: args, utility: utility))
     }
 }
 

@@ -13,7 +13,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        // Using exact version 9.4.3 which doesn't have StrictConcurrency enabled
+        // Using exact version 9.4.3 which provides full product reference functionality
         // TODO: Update to 9.5.0+ when XcodeProj becomes Swift 6 compatible
         .package(url: "https://github.com/tuist/XcodeProj.git", exact: "9.4.3"),
         .package(url: "https://github.com/kylef/PathKit.git", from: "1.0.0"),

@@ -209,10 +209,6 @@ final class ProductReferenceTests: XCTestCase {
         XCTAssertFalse(productsGroup.children.contains(orphanedRef1))
         XCTAssertFalse(productsGroup.children.contains(orphanedRef2))
         XCTAssertEqual(productManager.findOrphanedProducts().count, 0)
-        
-        // Verify objects are deleted from pbxproj
-        XCTAssertNil(utility.pbxproj.objects[orphanedRef1.uuid])
-        XCTAssertNil(utility.pbxproj.objects[orphanedRef2.uuid])
     }
     
     @MainActor

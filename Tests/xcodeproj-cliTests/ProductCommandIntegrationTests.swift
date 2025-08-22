@@ -60,20 +60,13 @@ final class ProductCommandIntegrationTests: XCTestCase {
         // Save project state before repair
         try utility.save()
         
-        // Execute repair command - should throw library limitation
+        // Execute repair command - should work with v9.4.3
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        XCTAssertThrowsError(try RepairProductReferencesCommand.execute(with: args, utility: utility)) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(_) = projectError {
-                // Expected behavior
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Should now succeed
+        XCTAssertNoThrow(try RepairProductReferencesCommand.execute(with: args, utility: utility))
         
-        // Project should still be valid despite limitation
+        // Project should be valid after successful repair
         XCTAssertNoThrow(try utility.save())
         let reloadedUtility = try XcodeProjUtility(path: projectPath.string)
         XCTAssertNotNil(reloadedUtility.pbxproj.rootObject)
@@ -145,18 +138,11 @@ final class ProductCommandIntegrationTests: XCTestCase {
         utility.pbxproj.add(object: brokenTarget)
         utility.pbxproj.rootObject?.targets.append(brokenTarget)
         
-        // Execute repair project command - should throw library limitation
+        // Execute repair project command - should work with v9.4.3
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
-        XCTAssertThrowsError(try RepairProjectCommand.execute(with: args, utility: utility)) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(_) = projectError {
-                // Expected behavior
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Should now succeed
+        XCTAssertNoThrow(try RepairProjectCommand.execute(with: args, utility: utility))
         
         // Verify target still exists
         let repairedTarget = utility.pbxproj.nativeTargets.first { $0.name == "BrokenTarget" }
@@ -269,19 +255,12 @@ final class ProductCommandIntegrationTests: XCTestCase {
         let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
         
         let startTime = CFAbsoluteTimeGetCurrent()
-        XCTAssertThrowsError(try RepairProductReferencesCommand.execute(with: args, utility: utility)) { error in
-            if let projectError = error as? ProjectError,
-               case .libraryLimitation(_) = projectError {
-                // Expected behavior
-                XCTAssertTrue(true)
-            } else {
-                XCTFail("Expected ProjectError.libraryLimitation")
-            }
-        }
+        // Should now succeed
+        XCTAssertNoThrow(try RepairProductReferencesCommand.execute(with: args, utility: utility))
         let executionTime = CFAbsoluteTimeGetCurrent() - startTime
         
-        // Should fail quickly due to library limitation
-        XCTAssertLessThan(executionTime, 1.0, "Should throw error quickly: \(executionTime) seconds")
+        // Should complete repair within reasonable time
+        XCTAssertLessThan(executionTime, 2.0, "Should complete repair quickly: \(executionTime) seconds")
         
         // Verify project integrity
         XCTAssertNoThrow(try utility.save())

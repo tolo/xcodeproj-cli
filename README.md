@@ -32,6 +32,7 @@ The tool's comprehensive feature set was inspired by [xcodeproj-mcp-server](http
 - **Swift Packages** - Add/remove SPM dependencies with version validation
 - **Build Phases** - Add run scripts and copy files phases
 - **Group Management** - Create and organize project groups
+- **Product Reference Management** - Validate and repair product references and Products group
 - **Scheme Management** - Create, configure, and manage Xcode schemes
 - **Workspace Support** - Create workspaces and manage multi-project setups
 - **Cross-Project Dependencies** - Link targets across different projects
@@ -497,6 +498,15 @@ done
 | `validate` | Check project integrity | `validate` |
 | `list-invalid-references` | Find broken file references | `list-invalid-references` |
 | `remove-invalid-references` | Clean up broken references | `remove-invalid-references` |
+
+### 🏷️ Product Reference Management
+| Command | Description | Example |
+|---------|-------------|---------|
+| `validate-products` | Check product references and Products group | `validate-products --fix` |
+| `repair-product-references` | Fix missing product references | `repair-product-references --targets MyApp,MyFramework` |
+| `add-product-reference` | Manually add product reference | `add-product-reference MyFramework --type com.apple.product-type.framework` |
+| `repair-project` | Comprehensive project repair | `repair-project` |
+| `repair-targets` | Repair target configuration | `repair-targets MyApp` |
 
 ### 🗂️ Group Management
 | Command | Description | Example |

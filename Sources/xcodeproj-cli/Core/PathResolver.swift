@@ -28,7 +28,7 @@ class PathResolver {
 
     // Validate path for security
     guard SecurityUtils.sanitizePath(filePath) != nil else {
-      print("⚠️  Warning: Invalid or potentially unsafe path: \(filePath)")
+      print("⚠️  Warning: Invalid or potentially unsafe path provided")
       return nil
     }
 
@@ -61,7 +61,7 @@ class PathResolver {
           for component in pathComponents {
             // Validate each path component for security
             guard SecurityUtils.sanitizePath(component) != nil else {
-              print("⚠️  Warning: Invalid path component: \(component)")
+              print("⚠️  Warning: Invalid path component provided")
               return nil
             }
             groupPath = groupPath + Path(component)
@@ -86,7 +86,7 @@ class PathResolver {
 
     // Validate path for security
     guard SecurityUtils.sanitizePath(groupPath) != nil else {
-      print("⚠️  Warning: Invalid or potentially unsafe group path: \(groupPath)")
+      print("⚠️  Warning: Invalid or potentially unsafe group path provided")
       return nil
     }
 
@@ -108,7 +108,7 @@ class PathResolver {
     for component in pathComponents {
       // Validate each path component for security
       guard SecurityUtils.sanitizePath(component) != nil else {
-        print("⚠️  Warning: Invalid path component in group: \(component)")
+        print("⚠️  Warning: Invalid path component in group provided")
         return nil
       }
       basePath = basePath + Path(component)
@@ -128,7 +128,7 @@ class PathResolver {
 
     // Validate path for security
     guard SecurityUtils.sanitizePath(filePath) != nil else {
-      print("⚠️  Warning: Invalid or potentially unsafe file path: \(filePath)")
+      print("⚠️  Warning: Invalid or potentially unsafe file path provided")
       return nil
     }
 

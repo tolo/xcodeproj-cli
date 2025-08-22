@@ -16,6 +16,7 @@ class XcodeProjUtility {
   let projectPath: Path
   let pbxproj: PBXProj
   private var transactionBackupPath: Path?
+  private var orphanedBackups: Set<Path> = []  // Track backups that failed to clean up
   private lazy var buildPhaseManager = BuildPhaseManager(pbxproj: pbxproj)
   private let cacheManager: CacheManager
   private let profiler: PerformanceProfiler?
@@ -64,12 +65,15 @@ class XcodeProjUtility {
       if FileManager.default.fileExists(atPath: backupPath.string) {
         try FileManager.default.removeItem(atPath: backupPath.string)
       }
+      // Only clear transaction state if cleanup succeeded
       transactionBackupPath = nil
       print("✅ Transaction committed")
     } catch {
-      // Backup cleanup failed - clear transaction state but log warning
+      // Backup cleanup failed - track orphaned backup but clear transaction state
+      orphanedBackups.insert(backupPath)
       transactionBackupPath = nil
       print("⚠️  Transaction committed but backup cleanup failed: \(error.localizedDescription)")
+      print("ℹ️  Orphaned backup tracked for later cleanup: \(backupPath.lastComponent)")
       // Don't throw - the main operation (save) succeeded
     }
   }
@@ -631,18 +635,19 @@ class XcodeProjUtility {
     }
 
     // Create build configurations
+    let swiftVersion = getSwiftVersion()
     let debugConfig = XCBuildConfiguration(name: "Debug")
     debugConfig.buildSettings = [
       "BUNDLE_IDENTIFIER": .string(bundleId),
       "PRODUCT_NAME": .string("$(TARGET_NAME)"),
-      "SWIFT_VERSION": .string("5.0"),
+      "SWIFT_VERSION": .string(swiftVersion),
     ]
 
     let releaseConfig = XCBuildConfiguration(name: "Release")
     releaseConfig.buildSettings = [
       "BUNDLE_IDENTIFIER": .string(bundleId),
       "PRODUCT_NAME": .string("$(TARGET_NAME)"),
-      "SWIFT_VERSION": .string("5.0"),
+      "SWIFT_VERSION": .string(swiftVersion),
     ]
 
     pbxproj.add(object: debugConfig)
@@ -677,11 +682,12 @@ class XcodeProjUtility {
     pbxproj.add(object: target)
     pbxproj.rootObject?.targets.append(target)
 
-    // Create product reference
+    // Create and link product reference
     let productManager = ProductReferenceManager(pbxproj: pbxproj)
     if let productTypeEnum = PBXProductType(rawValue: productType) {
-      let _ = try productManager.createProductReference(for: target, productType: productTypeEnum)
-      // TODO: Set target.productReference when property becomes accessible in XcodeProj library
+      let productRef = try productManager.createProductReference(
+        for: target, productType: productTypeEnum)
+      target.product = productRef
     }
 
     // Invalidate cache to pick up new target
@@ -758,6 +764,14 @@ class XcodeProjUtility {
     pbxproj.add(object: newTarget)
     pbxproj.rootObject?.targets.append(newTarget)
 
+    // Create and link product reference for the duplicated target
+    if let productType = newTarget.productType {
+      let productManager = ProductReferenceManager(pbxproj: pbxproj)
+      let productRef = try productManager.createProductReference(
+        for: newTarget, productType: productType)
+      newTarget.product = productRef
+    }
+
     // Invalidate cache to pick up new target
     cacheManager.invalidateTarget(newName)
     cacheManager.rebuildAllCaches()
@@ -768,6 +782,15 @@ class XcodeProjUtility {
   func removeTarget(name: String) throws {
     guard let target = cacheManager.getTarget(name) else {
       throw ProjectError.targetNotFound(name)
+    }
+
+    // Remove product reference from Products group if it exists
+    if let product = target.product,
+      let productsGroup = pbxproj.rootObject?.productsGroup,
+      let index = productsGroup.children.firstIndex(of: product)
+    {
+      productsGroup.children.remove(at: index)
+      pbxproj.delete(object: product)
     }
 
     // Remove from project targets
@@ -2685,5 +2708,75 @@ class XcodeProjUtility {
       }
       throw error
     }
+  }
+
+  // MARK: - Helper Methods
+  
+  private func getSwiftVersion() -> String {
+    // Try to detect from existing project first
+    if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
+      let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
+      case .string(let versionString) = existingVersion
+    {
+      return versionString
+    }
+    
+    // Check environment variable override
+    if let envSwiftVersion = ProcessInfo.processInfo.environment["XCODEPROJ_CLI_SWIFT_VERSION"] {
+      return envSwiftVersion
+    }
+    
+    // Try to detect current Swift version from runtime
+    if #available(macOS 10.15, *) {
+      // Use Swift version constants available at runtime
+      #if swift(>=6.0)
+        return "6.0"
+      #elseif swift(>=5.9)
+        return "5.9"
+      #elseif swift(>=5.8)
+        return "5.8"
+      #else
+        return "5.7"
+      #endif
+    }
+    
+    // Final fallback
+    return "6.0"
+  }
+  
+  // MARK: - Backup Cleanup
+  
+  /// Clean up any orphaned backup files that failed to be removed during transaction commits
+  func cleanupOrphanedBackups() -> Int {
+    var cleanedCount = 0
+    var stillOrphaned: Set<Path> = []
+    
+    for backupPath in orphanedBackups {
+      do {
+        if FileManager.default.fileExists(atPath: backupPath.string) {
+          try FileManager.default.removeItem(atPath: backupPath.string)
+          cleanedCount += 1
+        }
+        // Successfully cleaned (or file no longer exists)
+      } catch {
+        // Still failed to clean - keep tracking it
+        stillOrphaned.insert(backupPath)
+        print("⚠️  Failed to clean orphaned backup: \(backupPath.lastComponent)")
+      }
+    }
+    
+    // Update orphaned backups set to only contain ones we still couldn't clean
+    orphanedBackups = stillOrphaned
+    
+    if cleanedCount > 0 {
+      print("🧹 Cleaned up \(cleanedCount) orphaned backup file(s)")
+    }
+    
+    return cleanedCount
+  }
+  
+  /// Get count of orphaned backups that need cleanup
+  var orphanedBackupCount: Int {
+    return orphanedBackups.count
   }
 }

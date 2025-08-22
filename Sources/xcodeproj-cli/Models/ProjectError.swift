@@ -13,6 +13,7 @@ enum ProjectError: Error, CustomStringConvertible {
   case groupNotFound(String)
   case targetNotFound(String)
   case invalidArguments(String)
+  case invalidConfiguration(String)
   case operationFailed(String)
 
   // Workspace-specific errors
@@ -45,7 +46,6 @@ enum ProjectError: Error, CustomStringConvertible {
 
   // Feature availability errors
   case featureNotAvailable(String)
-  case libraryLimitation(String)
 
   var description: String {
     switch self {
@@ -57,6 +57,8 @@ enum ProjectError: Error, CustomStringConvertible {
       return "Target not found: \(name). Use 'list-targets' to see available targets."
     case .invalidArguments(let msg):
       return "Invalid arguments: \(msg)"
+    case .invalidConfiguration(let msg):
+      return "Invalid configuration: \(msg)"
     case .operationFailed(let msg):
       return "Operation failed: \(msg)"
 
@@ -103,8 +105,6 @@ enum ProjectError: Error, CustomStringConvertible {
 
     case .featureNotAvailable(let msg):
       return "Feature not available: \(msg)"
-    case .libraryLimitation(let msg):
-      return "Library limitation: \(msg)"
     }
   }
 }

@@ -65,10 +65,11 @@ class RepairProductReferencesCommand: Command {
       --dry-run            Preview changes without applying them
       --targets <list>     Comma-separated list of specific targets to repair
 
-    Current Limitations:
-      • Requires XcodeProj library v10.0+ for full product reference linking
-      • Commands prepare project structure for future library compatibility
-      • Products group and references are created but target linking is limited
+    What This Command Does:
+      • Creates missing product references for targets
+      • Links product references to their corresponding targets
+      • Ensures Products group exists and is properly organized
+      • Validates and repairs product reference integrity
 
     Examples:
       repair-product-references

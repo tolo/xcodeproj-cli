@@ -5,6 +5,7 @@ import XcodeProj
 @MainActor
 class ProductReferenceManager {
   private let pbxproj: PBXProj
+  private lazy var validationService = ProductValidationService(pbxproj: pbxproj)
 
   init(pbxproj: PBXProj) {
     self.pbxproj = pbxproj
@@ -15,6 +16,9 @@ class ProductReferenceManager {
   {
     let productName =
       target.productNameForReference() ?? "\(target.name).\(productType.fileExtension ?? "app")"
+    
+    // Validate the generated product name for security
+    try ProductCommandBase.validateProductNameSecurity(productName)
 
     let productRef = PBXFileReference(
       sourceTree: .buildProductsDir,
@@ -57,10 +61,34 @@ class ProductReferenceManager {
   func repairProductReferences(dryRun: Bool = false, targetNames: [String]? = nil) throws
     -> [String]
   {
-    // Current implementation limited by XcodeProj library's internal productReference property
-    throw ProjectError.libraryLimitation(
-      "Product reference repair requires XcodeProj library v10.0+. Current functionality creates Products group and references but cannot link to targets. Use 'validate-products' to check project structure."
-    )
+    var repaired: [String] = []
+
+    // Ensure Products group exists
+    let _ = try ensureProductsGroup()
+
+    // Find targets missing product references
+    let targetsToRepair = pbxproj.nativeTargets.filter { target in
+      if let targetNames = targetNames, !targetNames.contains(target.name) {
+        return false
+      }
+      return target.product == nil && target.productType != nil
+    }
+
+    for target in targetsToRepair {
+      if !dryRun {
+        // Safely get product type - this should always succeed since we filtered above
+        guard let productType = target.productType else {
+          throw ProjectError.invalidConfiguration("Target '\(target.name)' has no product type")
+        }
+        
+        // Create and link product reference
+        let productRef = try createProductReference(for: target, productType: productType)
+        target.product = productRef
+      }
+      repaired.append("Repaired product reference for target '\(target.name)'")
+    }
+
+    return repaired
   }
 
   func validateProducts() throws -> [ValidationIssue] {
@@ -91,43 +119,55 @@ class ProductReferenceManager {
       }
     }
 
-    // Note library limitation for full validation
-    if !pbxproj.nativeTargets.isEmpty {
-      issues.append(
-        ValidationIssue(
-          type: .missingProductReference,
-          message: "Complete product reference validation requires XcodeProj library v10.0+",
-          severity: .info
+    // Check for missing product references
+    for target in pbxproj.nativeTargets {
+      if target.product == nil && target.productType != nil {
+        issues.append(
+          ValidationIssue(
+            type: .missingProductReference,
+            message: "Target '\(target.name)' missing product reference",
+            targetName: target.name,
+            severity: .error
+          )
         )
-      )
+      }
     }
 
     return issues
   }
 
   func findOrphanedProducts() -> [PBXFileReference] {
-    guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
-
-    // Since we can't access productReference, return all products as potentially orphaned
-    // Use lazy evaluation for memory efficiency with large projects
-    return productsGroup.children.lazy
-      .compactMap { $0 as? PBXFileReference }
-      // NOTE: The filter { _ in true } is intentionally a no-op placeholder.
-      // When XcodeProj library v10.0+ provides access to productReference,
-      // this will be replaced with actual orphan detection logic:
-      // .filter { !isReferencedByAnyTarget($0) }
-      .filter { _ in true }
+    return validationService.findOrphanedProducts()
   }
 
   func removeOrphanedProducts() throws -> Int {
-    throw ProjectError.libraryLimitation(
-      "Orphaned product removal requires XcodeProj library v10.0+ for productReference access. Use manual cleanup through Xcode or wait for library update."
-    )
+    guard let productsGroup = pbxproj.rootObject?.productsGroup else { return 0 }
+
+    let orphanedProducts = findOrphanedProducts()
+    let count = orphanedProducts.count
+
+    for product in orphanedProducts {
+      // Remove from Products group
+      if let index = productsGroup.children.firstIndex(of: product) {
+        productsGroup.children.remove(at: index)
+      }
+      
+      // Remove from pbxproj objects
+      pbxproj.delete(object: product)
+    }
+
+    return count
   }
 
   func addProductReference(
     to target: PBXNativeTarget, productName: String? = nil, productType: PBXProductType? = nil
   ) throws {
+    // Check if target already has a product reference to prevent duplicates
+    if target.product != nil {
+      print("ℹ️  Target already has a product reference")
+      return
+    }
+    
     // Validate product name if provided using the shared validation
     if let name = productName {
       try ProductCommandBase.validateProductNameSecurity(name)
@@ -142,33 +182,14 @@ class ProductReferenceManager {
       productRef.path = customName
     }
 
-    // Library limitation: Cannot set target.productReference due to internal property access
-    // Reference created in Products group but target linking requires XcodeProj library v10.0+
+    // Link the product reference to the target
+    target.product = productRef
   }
 
   func findMissingProductReferences() -> [PBXNativeTarget] {
-    // Current limitation: Cannot access productReference property
-    // Return targets that likely need product references based on available data
-
-    // Early return if no products group
-    guard let productsGroup = pbxproj.rootObject?.productsGroup else {
-      return pbxproj.nativeTargets
-    }
-
-    // Build a set of existing product names for O(1) lookup
-    let existingProducts = Set(
-      productsGroup.children.lazy.flatMap { child -> [String] in
-        var names: [String] = []
-        if let name = child.name { names.append(name) }
-        if let path = child.path { names.append(path) }
-        return names
-      }
-    )
-
-    // Filter targets using O(1) set lookup instead of O(m) array search
+    // Return targets that don't have a product reference but should have one
     return pbxproj.nativeTargets.filter { target in
-      let expectedProductName = target.productNameForReference() ?? "\(target.name).app"
-      return !existingProducts.contains(expectedProductName)
+      target.product == nil && target.productType != nil
     }
   }
 
@@ -221,6 +242,38 @@ class ProductReferenceManager {
     target.buildPhases.append(frameworksBuildPhase)
   }
 
+  private func getSwiftVersion() -> String {
+    // Try to detect from existing project first
+    if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
+      let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
+      case .string(let versionString) = existingVersion
+    {
+      return versionString
+    }
+    
+    // Check environment variable override
+    if let envSwiftVersion = ProcessInfo.processInfo.environment["XCODEPROJ_CLI_SWIFT_VERSION"] {
+      return envSwiftVersion
+    }
+    
+    // Try to detect current Swift version from runtime
+    if #available(macOS 10.15, *) {
+      // Use Swift version constants available at runtime
+      #if swift(>=6.0)
+        return "6.0"
+      #elseif swift(>=5.9)
+        return "5.9"
+      #elseif swift(>=5.8)
+        return "5.8"
+      #else
+        return "5.7"
+      #endif
+    }
+    
+    // Final fallback
+    return "6.0"
+  }
+
   private func addMissingBuildConfigurations(to target: PBXNativeTarget) throws {
     let swiftVersion = getSwiftVersion()
 
@@ -251,17 +304,6 @@ class ProductReferenceManager {
     target.buildConfigurationList = configList
   }
 
-  private func getSwiftVersion() -> String {
-    // Try to detect from existing project first, fall back to current Swift version
-    if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
-      let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
-      case .string(let versionString) = existingVersion
-    {
-      return versionString
-    }
-    // Default to Swift 6.0 for new configurations
-    return "6.0"
-  }
 }
 
 extension PBXProductType {
@@ -328,39 +370,3 @@ extension PBXProductType {
   }
 }
 
-struct ValidationIssue: Sendable {
-  enum IssueType: Sendable {
-    case missingProductReference
-    case orphanedProductReference
-    case missingProductsGroup
-    case invalidProductPath
-  }
-
-  let type: IssueType
-  let message: String
-
-  // Structured data for programmatic access
-  let targetName: String?
-  let productName: String?
-  let severity: Severity
-
-  enum Severity: String, Sendable {
-    case error
-    case warning
-    case info
-  }
-
-  init(
-    type: IssueType,
-    message: String,
-    targetName: String? = nil,
-    productName: String? = nil,
-    severity: Severity = .error
-  ) {
-    self.type = type
-    self.message = message
-    self.targetName = targetName
-    self.productName = productName
-    self.severity = severity
-  }
-}

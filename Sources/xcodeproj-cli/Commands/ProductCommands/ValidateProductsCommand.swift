@@ -31,24 +31,29 @@ class ValidateProductsCommand: Command {
         print("\n🔧 Attempting to fix issues...")
         var fixedCount = 0
 
+        // Fix issues with fresh validation to prevent TOCTOU race conditions
         for issue in issues {
           switch issue.type {
           case .missingProductReference:
             // Extract target name from message
             if let targetName = extractTargetName(from: issue.message) {
-              if let target = utility.pbxproj.nativeTargets.first(where: { $0.name == targetName })
-              {
+              // Re-validate this specific target to ensure it still needs fixing
+              if let target = utility.pbxproj.nativeTargets.first(where: { $0.name == targetName }),
+                 target.product == nil {
                 try productManager.addProductReference(to: target)
                 print("  ✅ Fixed missing product reference for '\(targetName)'")
                 fixedCount += 1
               }
             }
           case .missingProductsGroup:
-            _ = try productManager.ensureProductsGroup()
-            print("  ✅ Created missing Products group")
-            fixedCount += 1
+            // Re-check if Products group is still missing
+            if utility.pbxproj.rootObject?.productsGroup == nil {
+              _ = try productManager.ensureProductsGroup()
+              print("  ✅ Created missing Products group")
+              fixedCount += 1
+            }
           case .orphanedProductReference:
-            // These will be handled by removeOrphanedProducts
+            // These will be handled by removeOrphanedProducts with fresh validation
             break
           case .invalidProductPath:
             // Would need specific repair logic for path issues
@@ -56,7 +61,7 @@ class ValidateProductsCommand: Command {
           }
         }
 
-        // Remove orphaned products
+        // Remove orphaned products with fresh validation
         let orphanedCount = try productManager.removeOrphanedProducts()
         if orphanedCount > 0 {
           print("  ✅ Removed \(orphanedCount) orphaned product reference(s)")
@@ -83,6 +88,11 @@ class ValidateProductsCommand: Command {
     let suffix = "' is missing product reference"
     
     guard message.hasPrefix(prefix) && message.hasSuffix(suffix) else {
+      return nil
+    }
+    
+    // Add bounds checking to prevent string index out of bounds
+    guard message.count >= (prefix.count + suffix.count) else {
       return nil
     }
     

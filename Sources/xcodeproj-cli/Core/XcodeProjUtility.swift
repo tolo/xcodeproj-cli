@@ -2709,14 +2709,34 @@ class XcodeProjUtility {
   // MARK: - Helper Methods
   
   private func getSwiftVersion() -> String {
-    // Try to detect from existing project first, fall back to current Swift version
+    // Try to detect from existing project first
     if let projectConfig = pbxproj.rootObject?.buildConfigurationList?.buildConfigurations.first,
       let existingVersion = projectConfig.buildSettings["SWIFT_VERSION"],
       case .string(let versionString) = existingVersion
     {
       return versionString
     }
-    // Default to Swift 6.0 for new configurations
+    
+    // Check environment variable override
+    if let envSwiftVersion = ProcessInfo.processInfo.environment["XCODEPROJ_CLI_SWIFT_VERSION"] {
+      return envSwiftVersion
+    }
+    
+    // Try to detect current Swift version from runtime
+    if #available(macOS 10.15, *) {
+      // Use Swift version constants available at runtime
+      #if swift(>=6.0)
+        return "6.0"
+      #elseif swift(>=5.9)
+        return "5.9"
+      #elseif swift(>=5.8)
+        return "5.8"
+      #else
+        return "5.7"
+      #endif
+    }
+    
+    // Final fallback
     return "6.0"
   }
 }

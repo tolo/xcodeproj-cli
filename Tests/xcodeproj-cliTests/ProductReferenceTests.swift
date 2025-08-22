@@ -174,6 +174,101 @@ final class ProductReferenceTests: XCTestCase {
     }
     
     @MainActor
+    func testRemoveOrphanedProducts() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Ensure Products group exists
+        let productsGroup = try productManager.ensureProductsGroup()
+        
+        // Create multiple orphaned product references
+        let orphanedRef1 = PBXFileReference(
+            sourceTree: .buildProductsDir,
+            name: "OrphanedApp1.app"
+        )
+        let orphanedRef2 = PBXFileReference(
+            sourceTree: .buildProductsDir,
+            name: "OrphanedFramework.framework"
+        )
+        
+        utility.pbxproj.add(object: orphanedRef1)
+        utility.pbxproj.add(object: orphanedRef2)
+        productsGroup.children.append(orphanedRef1)
+        productsGroup.children.append(orphanedRef2)
+        
+        // Verify they exist before removal
+        XCTAssertTrue(productsGroup.children.contains(orphanedRef1))
+        XCTAssertTrue(productsGroup.children.contains(orphanedRef2))
+        XCTAssertEqual(productManager.findOrphanedProducts().count, 2)
+        
+        // Remove orphaned products
+        let removedCount = try productManager.removeOrphanedProducts()
+        
+        // Verify removal
+        XCTAssertEqual(removedCount, 2)
+        XCTAssertFalse(productsGroup.children.contains(orphanedRef1))
+        XCTAssertFalse(productsGroup.children.contains(orphanedRef2))
+        XCTAssertEqual(productManager.findOrphanedProducts().count, 0)
+        
+        // Verify objects are deleted from pbxproj
+        XCTAssertNil(utility.pbxproj.objects[orphanedRef1.uuid])
+        XCTAssertNil(utility.pbxproj.objects[orphanedRef2.uuid])
+    }
+    
+    @MainActor
+    func testRemoveOrphanedProductsWithValidProducts() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Create a target with valid product reference
+        let target = PBXNativeTarget(
+            name: "ValidApp",
+            productName: "ValidApp",
+            productType: .application
+        )
+        utility.pbxproj.add(object: target)
+        utility.pbxproj.rootObject?.targets.append(target)
+        
+        // Create product reference for target
+        let validProductRef = try productManager.createProductReference(for: target, productType: .application)
+        target.product = validProductRef
+        
+        // Create orphaned product reference
+        let productsGroup = try productManager.ensureProductsGroup()
+        let orphanedRef = PBXFileReference(
+            sourceTree: .buildProductsDir,
+            name: "OrphanedApp.app"
+        )
+        utility.pbxproj.add(object: orphanedRef)
+        productsGroup.children.append(orphanedRef)
+        
+        // Remove orphaned products
+        let removedCount = try productManager.removeOrphanedProducts()
+        
+        // Verify only orphaned product was removed
+        XCTAssertEqual(removedCount, 1)
+        XCTAssertTrue(productsGroup.children.contains(validProductRef))
+        XCTAssertFalse(productsGroup.children.contains(orphanedRef))
+        
+        // Verify valid product is still linked to target
+        XCTAssertEqual(target.product, validProductRef)
+    }
+    
+    @MainActor
+    func testRemoveOrphanedProductsEmptyCase() throws {
+        try setupUtility()
+        let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
+        
+        // Ensure Products group exists but has no orphaned products
+        _ = try productManager.ensureProductsGroup()
+        
+        // Remove orphaned products when there are none
+        let removedCount = try productManager.removeOrphanedProducts()
+        
+        XCTAssertEqual(removedCount, 0)
+    }
+    
+    @MainActor
     func testAddProductReference() throws {
         try setupUtility()
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)

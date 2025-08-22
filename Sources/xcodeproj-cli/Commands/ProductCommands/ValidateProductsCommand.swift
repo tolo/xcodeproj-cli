@@ -77,23 +77,32 @@ class ValidateProductsCommand: Command {
 
   private static func extractTargetName(from message: String) -> String? {
     // Extract target name from message like "Target 'MyApp' is missing product reference"
-    let pattern = #"Target '([^']+)' is missing product reference"#
-
-    do {
-      let regex = try NSRegularExpression(pattern: pattern, options: [])
-      guard
-        let match = regex.firstMatch(
-          in: message, range: NSRange(message.startIndex..., in: message)),
-        match.numberOfRanges > 1,
-        let range = Range(match.range(at: 1), in: message)
-      else {
-        return nil
-      }
-      return String(message[range])
-    } catch {
-      print("⚠️  Error creating regex pattern for target name extraction: \(error)")
+    // Use safer string parsing instead of regex to avoid ReDoS vulnerabilities
+    
+    let prefix = "Target '"
+    let suffix = "' is missing product reference"
+    
+    guard message.hasPrefix(prefix) && message.hasSuffix(suffix) else {
       return nil
     }
+    
+    let startIndex = message.index(message.startIndex, offsetBy: prefix.count)
+    let endIndex = message.index(message.endIndex, offsetBy: -suffix.count)
+    
+    guard startIndex < endIndex else {
+      return nil
+    }
+    
+    let targetName = String(message[startIndex..<endIndex])
+    
+    // Validate target name to ensure it's reasonable
+    guard !targetName.isEmpty,
+          targetName.count <= 255,
+          !targetName.contains("'") else {
+      return nil
+    }
+    
+    return targetName
   }
 
   static func printUsage() {

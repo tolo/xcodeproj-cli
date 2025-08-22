@@ -16,6 +16,7 @@ class XcodeProjUtility {
   let projectPath: Path
   let pbxproj: PBXProj
   private var transactionBackupPath: Path?
+  private var orphanedBackups: Set<Path> = []  // Track backups that failed to clean up
   private lazy var buildPhaseManager = BuildPhaseManager(pbxproj: pbxproj)
   private let cacheManager: CacheManager
   private let profiler: PerformanceProfiler?
@@ -64,12 +65,15 @@ class XcodeProjUtility {
       if FileManager.default.fileExists(atPath: backupPath.string) {
         try FileManager.default.removeItem(atPath: backupPath.string)
       }
+      // Only clear transaction state if cleanup succeeded
       transactionBackupPath = nil
       print("✅ Transaction committed")
     } catch {
-      // Backup cleanup failed - clear transaction state but log warning
+      // Backup cleanup failed - track orphaned backup but clear transaction state
+      orphanedBackups.insert(backupPath)
       transactionBackupPath = nil
       print("⚠️  Transaction committed but backup cleanup failed: \(error.localizedDescription)")
+      print("ℹ️  Orphaned backup tracked for later cleanup: \(backupPath.lastComponent)")
       // Don't throw - the main operation (save) succeeded
     }
   }
@@ -2738,5 +2742,41 @@ class XcodeProjUtility {
     
     // Final fallback
     return "6.0"
+  }
+  
+  // MARK: - Backup Cleanup
+  
+  /// Clean up any orphaned backup files that failed to be removed during transaction commits
+  func cleanupOrphanedBackups() -> Int {
+    var cleanedCount = 0
+    var stillOrphaned: Set<Path> = []
+    
+    for backupPath in orphanedBackups {
+      do {
+        if FileManager.default.fileExists(atPath: backupPath.string) {
+          try FileManager.default.removeItem(atPath: backupPath.string)
+          cleanedCount += 1
+        }
+        // Successfully cleaned (or file no longer exists)
+      } catch {
+        // Still failed to clean - keep tracking it
+        stillOrphaned.insert(backupPath)
+        print("⚠️  Failed to clean orphaned backup: \(backupPath.lastComponent)")
+      }
+    }
+    
+    // Update orphaned backups set to only contain ones we still couldn't clean
+    orphanedBackups = stillOrphaned
+    
+    if cleanedCount > 0 {
+      print("🧹 Cleaned up \(cleanedCount) orphaned backup file(s)")
+    }
+    
+    return cleanedCount
+  }
+  
+  /// Get count of orphaned backups that need cleanup
+  var orphanedBackupCount: Int {
+    return orphanedBackups.count
   }
 }

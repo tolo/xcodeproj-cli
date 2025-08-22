@@ -15,6 +15,7 @@ class ProjectValidator {
   private let pbxproj: PBXProj
   private let projectPath: Path
   private lazy var buildPhaseManager = BuildPhaseManager(pbxproj: pbxproj)
+  private lazy var validationService = ProductValidationService(pbxproj: pbxproj)
 
   init(pbxproj: PBXProj, projectPath: Path) {
     self.pbxproj = pbxproj
@@ -411,21 +412,6 @@ class ProjectValidator {
 
   /// Find orphaned product references in Products group
   func findOrphanedProductReferences() -> [PBXFileReference] {
-    guard let productsGroup = pbxproj.rootObject?.productsGroup else { return [] }
-
-    // Build set of all products referenced by targets
-    let referencedProducts = Set(pbxproj.nativeTargets.compactMap { $0.product })
-
-    // Find products in Products group that aren't referenced by any target
-    var orphaned: [PBXFileReference] = []
-    for child in productsGroup.children {
-      if let fileRef = child as? PBXFileReference,
-        !referencedProducts.contains(fileRef)
-      {
-        orphaned.append(fileRef)
-      }
-    }
-
-    return orphaned
+    return validationService.findOrphanedProducts()
   }
 }

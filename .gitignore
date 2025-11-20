@@ -11,6 +11,7 @@ Package.resolved
 DerivedData/
 .build/
 /xcodeproj-cli
+.swift-module-cache
 
 # Code coverage
 *.profraw
@@ -30,6 +31,5 @@ Tests/xcodeproj-cliTests/TestResources/TestFolder/
 # Claude Code
 .claude/settings.local.json
 ai_docs/
-.claude/agents/
-.claude/commands/
-.swift-module-cache
+.claude/agents/custom
+.claude/commands/custom

@@ -10,7 +10,7 @@ Package.resolved
 *.swiftpm
 DerivedData/
 .build/
-xcodeproj-cli
+/xcodeproj-cli
 
 # Code coverage
 *.profraw

@@ -282,7 +282,7 @@ If you were using the Swift script version (v1.x), you'll need to:
 
 ### Added
 - `list-tree` command - Display complete project structure as a tree with filesystem paths for actual files/folders
-- `add-group` command - Create empty virtual groups (renamed from `create-groups`)
+- `create-groups` command - Create empty virtual groups (alias: `add-group`)
 - `list-build-settings` command - Enhanced Xcode-style display of build settings with multiple output formats
   - Setting-centric view (like Xcode) showing values across configurations
   - `--json`/`-j` flag for JSON output suitable for automation
@@ -301,7 +301,7 @@ If you were using the Swift script version (v1.x), you'll need to:
 ### Changed
 - `list-groups` command now uses tree-style formatting with box-drawing characters (├──, └──, │)
 - `list-tree` intelligently shows paths only for actual file/folder references, not virtual groups
-- `create-groups` command renamed to `add-group` for consistency
+- `add-group` alias added for `create-groups` to match older docs/examples
 - `remove-folder` command deprecated in favor of `remove-group` (handles all group types)
 - Improved documentation for groups vs folders vs file references
 - Enhanced README with clearer explanations of Xcode project organization

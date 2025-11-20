@@ -194,7 +194,7 @@ xcodeproj-cli remove-folder Resources/OldAssets
 
 ```bash
 # Create groups for organizing files (no filesystem folders created)
-xcodeproj-cli add-group UI/Components UI/Screens Services/API
+xcodeproj-cli create-groups UI/Components UI/Screens Services/API  # alias: add-group
 
 # Show complete project structure (RECOMMENDED)
 xcodeproj-cli list-tree
@@ -324,11 +324,11 @@ Xcode has three distinct ways to organize and reference files in your project:
 - **Icon**: Yellow folder icon in Xcode
 - **Filesystem**: NO actual folders created on disk
 - **Use When**: You want to organize files in Xcode differently than on disk
-- **Commands**: `add-group` (creates empty groups), `remove-group` (removes any group type)
+- **Commands**: `create-groups` (alias: `add-group`), `remove-group` (removes any group type)
 
 ```bash
 # Create virtual organization structure
-xcodeproj-cli add-group UI/Components UI/Screens
+xcodeproj-cli create-groups UI/Components UI/Screens  # alias: add-group
 
 # Files can be in any disk location but appear organized in Xcode
 xcodeproj-cli add-file random/path/Button.swift --group UI/Components --targets MyApp
@@ -365,7 +365,7 @@ xcodeproj-cli add-folder Sources/Features --group Features --targets MyApp --rec
 **Scenario 1: Organizing existing files**
 ```bash
 # Just create groups - no need to move files on disk
-xcodeproj-cli add-group Architecture/MVVM/Models Architecture/MVVM/Views
+xcodeproj-cli create-groups Architecture/MVVM/Models Architecture/MVVM/Views  # alias: add-group
 xcodeproj-cli add-file Sources/User.swift --group Architecture/MVVM/Models --targets MyApp
 ```
 
@@ -422,7 +422,7 @@ validate                              # Check project health
 
 ```bash
 # Create the folder structure
-xcodeproj-cli add-group \
+xcodeproj-cli create-groups \
   Features/UserProfile \
   Features/UserProfile/Models \
   Features/UserProfile/Views \
@@ -517,7 +517,7 @@ done
 ### 🗂️ Group Management
 | Command | Description | Example |
 |---------|-------------|---------|  
-| `add-group` | Add empty virtual groups | `add-group UI/Components Services/API` |
+| `create-groups` (alias: `add-group`) | Add empty virtual groups | `create-groups UI/Components Services/API` |
 | `remove-group` | Remove any group/folder type | `remove-group OldGroup` |
 
 ### 📁 File & Folder Management
@@ -637,7 +637,7 @@ xcodeproj-cli add-files \
   --targets MyApp,MyAppTests
 
 # Create a complete group structure at once
-xcodeproj-cli add-group \
+xcodeproj-cli create-groups \
   Features/Authentication \
   Features/Profile \
   Features/Settings \
@@ -688,7 +688,7 @@ xcodeproj-cli set-build-setting ENABLE_PRO_FEATURES YES --targets MyAppPro
 **Example 3: Organizing an existing messy project**
 ```bash
 # Create a clean structure with groups (no files are moved on disk)
-xcodeproj-cli add-group \
+xcodeproj-cli create-groups \
   Architecture/Models \
   Architecture/Views \
   Architecture/ViewModels \

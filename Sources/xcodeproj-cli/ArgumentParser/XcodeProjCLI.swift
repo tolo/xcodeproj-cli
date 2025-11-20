@@ -22,7 +22,8 @@ struct XcodeProjCLI: AsyncParsableCommand {
       AddFilesCommand.self,
       AddSyncFolderCommand.self,
 
-      // Group Operations (3)
+      // Group Operations (4)
+      AddGroupCommand.self,
       CreateGroupsCommand.self,
       ListGroupsCommand.self,
       RemoveGroupCommand.self,

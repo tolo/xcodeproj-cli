@@ -1,0 +1,19 @@
+OVERVIEW: Add a dependency relationship between targets
+
+USAGE: xcodeproj-cli add-dependency [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <target> --depends-on <depends-on>
+
+ARGUMENTS:
+  <target>                Target that will depend on another target
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --depends-on <depends-on>
+                          Target that will be depended upon
+  --version               Show the version.
+  -h, --help              Show help information.
+

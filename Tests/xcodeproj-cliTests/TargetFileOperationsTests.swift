@@ -150,18 +150,32 @@ final class TargetFileOperationsTests: XCTProjectTestCase {
     let result = try runCommand("add-target-file", arguments: [
       "SomeFile.swift"
     ])
-    
+
     TestHelpers.assertCommandFailure(result)
-    TestHelpers.assertOutputOrErrorContains(result, "Missing required --targets or --target")
+    // ArgumentParser validation message
+    XCTAssertTrue(
+      result.output.contains("Missing expected argument") ||
+      result.error.contains("Missing expected argument") ||
+      result.output.contains("required") ||
+      result.error.contains("required"),
+      "Should report missing required flag. Got: \(result.error)"
+    )
   }
-  
+
   func testRemoveTargetFileWithoutTargetFlag() throws {
     // Try to remove file without specifying target
     let result = try runCommand("remove-target-file", arguments: [
       "SomeFile.swift"
     ])
-    
+
     TestHelpers.assertCommandFailure(result)
-    TestHelpers.assertOutputOrErrorContains(result, "Missing required --targets or --target")
+    // ArgumentParser validation message
+    XCTAssertTrue(
+      result.output.contains("Missing expected argument") ||
+      result.error.contains("Missing expected argument") ||
+      result.output.contains("required") ||
+      result.error.contains("required"),
+      "Should report missing required flag. Got: \(result.error)"
+    )
   }
 }

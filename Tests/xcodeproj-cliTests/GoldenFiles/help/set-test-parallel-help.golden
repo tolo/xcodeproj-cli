@@ -1,0 +1,19 @@
+OVERVIEW: Enable or disable test parallelization for a scheme
+
+USAGE: xcodeproj-cli set-test-parallel [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <scheme-name> [--enable] [--disable]
+
+ARGUMENTS:
+  <scheme-name>           Name of the scheme to configure
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --enable                Enable test parallelization
+  --disable               Disable test parallelization
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -1,0 +1,85 @@
+OVERVIEW: A powerful command-line tool for Xcode project manipulation
+
+USAGE: xcodeproj-cli [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <subcommand>
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+
+SUBCOMMANDS:
+  add-file                Add a single file to specified group and targets
+  remove-file             Remove a file from the project
+  move-file               Move or rename a file in the project
+  add-folder              Add files from filesystem folder to project group
+  add-files               Add multiple files to specified groups and targets in
+                          batch
+  add-sync-folder         Add a synchronized folder that maintains sync with
+                          filesystem
+  create-groups           Create group hierarchies in the project
+  list-groups             List groups in the project as a tree structure
+  remove-group            Remove a group and its contents from the project
+  add-target              Add a new target to the project
+  duplicate-target        Duplicate an existing target with a new name
+  remove-target           Remove a target from the project
+  add-dependency          Add a dependency relationship between targets
+  add-target-file         Add an existing file to a target's compile sources or
+                          resources
+  remove-target-file      Remove a file from a target's compile sources or
+                          resources without removing it from the project
+  list-targets            List all targets in the project with their product
+                          types
+  set-build-setting       Set build setting on specified targets
+  get-build-settings      Get build settings from a target
+  list-build-settings     List build settings for project or target
+  list-build-configs      List build configurations for a target or the project
+  add-build-phase         Add a build phase to a target
+  add-framework           Add a framework to a target
+  add-swift-package       Add Swift Package dependency to the project
+  remove-swift-package    Remove Swift Package dependency from the project
+  list-swift-packages     List Swift Package dependencies in the project
+  update-swift-packages   Update Swift Package dependencies to their latest
+                          versions
+  validate                Validate project integrity
+  list-files              List files in the project or a specific group
+  list-tree               List the complete project structure as a tree
+  list-invalid-references List invalid file references in the project
+  remove-invalid-references
+                          Remove invalid file references from the project
+  validate-products       Comprehensive validation of product references and
+                          Products group integrity
+  update-paths            Update file paths with prefix replacement
+  update-paths-map        Update file paths using a mapping of old to new paths
+  repair-product-references
+                          Automatically detect and fix missing or broken
+                          product references for all targets
+  add-product-reference   Manually add or update a product reference for a
+                          specific target
+  repair-project          Comprehensive project repair command that fixes
+                          multiple corruption types
+  repair-targets          Fix common target-related issues including missing
+                          product references and build phases
+  create-scheme           Create a new scheme for a target
+  duplicate-scheme        Duplicate an existing scheme
+  remove-scheme           Remove a scheme
+  list-schemes            List all schemes in the project
+  set-scheme-config       Set build configurations for scheme actions
+  add-scheme-target       Add a target to a scheme's build action
+  enable-test-coverage    Enable test coverage for a scheme
+  set-test-parallel       Enable or disable test parallelization for a scheme
+  create-workspace        Create a new workspace
+  add-project-to-workspace
+                          Add a project to an existing workspace
+  remove-project-from-workspace
+                          Remove a project from a workspace
+  list-workspace-projects List all projects in a workspace
+  add-project-reference   Add a reference to an external project
+  add-cross-project-dependency
+                          Add a dependency on a target in another project
+
+  See 'xcodeproj-cli help <subcommand>' for detailed help.

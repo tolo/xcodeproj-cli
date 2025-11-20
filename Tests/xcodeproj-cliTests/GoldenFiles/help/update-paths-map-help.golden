@@ -1,0 +1,18 @@
+OVERVIEW: Update file paths using a mapping of old to new paths
+
+USAGE: xcodeproj-cli update-paths-map [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <mappings> ...
+
+ARGUMENTS:
+  <mappings>              Path mappings in format 'old:new' (e.g.,
+                          'Sources/Old/File.swift:Sources/New/File.swift')
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

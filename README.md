@@ -40,6 +40,7 @@ The tool's comprehensive feature set was inspired by [xcodeproj-mcp-server](http
 - **Localization Support** - Manage localizations and variant groups
 
 ### ✨ Smart Features
+- **Modern CLI** - Built with swift-argument-parser for type-safe, auto-generated help
 - **Recursive folder scanning** with intelligent file filtering
 - **Automatic build phase assignment** (sources vs resources)
 - **File type detection** for 20+ file types
@@ -50,7 +51,7 @@ The tool's comprehensive feature set was inspired by [xcodeproj-mcp-server](http
 - **Transaction support** - Group operations with rollback capability
 - **Performance optimizations** - Intelligent caching system with cache hit/miss statistics
 - **Verbose mode** - Detailed operation insights with `--verbose` flag
-- **Modular architecture** - 55+ specialized modules for maintainability
+- **Modular architecture** - Service-oriented design with focused responsibilities
 
 ### 🔒 Security Features
 - **Path traversal protection** - Prevents directory escaping
@@ -145,6 +146,10 @@ xcodeproj-cli --project App.xcodeproj --dry-run --verbose add-file File.swift --
 # Many flags have short forms for convenience:
 # --group / -g, --targets / -t, --recursive / -r, --verbose / -V
 xcodeproj-cli add-file Helper.swift -g Utils -t MyApp -V
+
+# Get help for any command
+xcodeproj-cli <command> --help
+xcodeproj-cli add-file --help
 ```
 
 ### Common Workflows
@@ -400,9 +405,10 @@ validate                              # Check project health
 1. **Always use `--project`** to specify the exact .xcodeproj file
 2. **Use `--dry-run`** first to preview changes
 3. **Use `--verbose`** to monitor performance and see detailed operation insights
-4. **Check available targets** with `list-targets` before adding files
-5. **Use `list-groups`** to see the project structure
-6. **Run `validate`** after bulk operations
+4. **Use `--help`** to see detailed command usage: `xcodeproj-cli <command> --help`
+5. **Check available targets** with `list-targets` before adding files
+6. **Use `list-groups`** to see the project structure
+7. **Run `validate`** after bulk operations
 
 ### Path Handling
 - Relative paths (e.g., `Sources/Helper.swift`) are preferred for project files
@@ -812,36 +818,63 @@ MIT License - see [LICENSE](./LICENSE) file for details.
 xcodeproj-cli/
 ├── Sources/
 │   └── xcodeproj-cli/
-│       ├── main.swift         # Application entry point
-│       ├── CLI/               # Command-line interface layer
-│       ├── Commands/          # 30+ modular command implementations
-│       ├── Core/              # Core services (caching, transactions, validation)
-│       ├── Models/            # Data structures and error types
-│       └── Utils/             # Utility functions and helpers
-├── Package.swift              # Swift Package Manager configuration
-├── ARCHITECTURE.md            # Detailed architecture documentation for developers
-├── build-universal.sh         # Universal binary build script
+│       ├── ArgumentParser/               # ArgumentParser-based CLI layer
+│       │   ├── XcodeProjCLI.swift        # Main command structure (@main)
+│       │   ├── GlobalOptions.swift       # Shared options (--project, --verbose, --dry-run)
+│       │   ├── ProjectServiceFactory.swift # Service initialization
+│       │   └── Commands/                 # 52 command implementations
+│       │       ├── FileCommands/         # File operations (6 commands)
+│       │       ├── TargetCommands/       # Target management (7 commands)
+│       │       ├── GroupCommands/        # Group operations (3 commands)
+│       │       ├── BuildCommands/        # Build configuration (5 commands)
+│       │       ├── PackageCommands/      # Swift packages (4 commands)
+│       │       ├── SchemeCommands/       # Scheme management (7 commands)
+│       │       ├── WorkspaceCommands/    # Workspace operations (6 commands)
+│       │       ├── InspectionCommands/   # Validation (5 commands)
+│       │       ├── ProductCommands/      # Product references (5 commands)
+│       │       ├── PathCommands/         # Path updates (2 commands)
+│       │       └── FrameworkCommands/    # Framework management (2 commands)
+│       ├── Services/                     # Extracted focused services
+│       │   ├── FileService.swift         # File operations (~400 lines)
+│       │   ├── TargetService.swift       # Target management (~350 lines)
+│       │   ├── GroupService.swift        # Group hierarchy (~300 lines)
+│       │   ├── PackageService.swift      # SPM integration (~250 lines)
+│       │   ├── BuildSettingsService.swift # Build config (~200 lines)
+│       │   ├── TransactionService.swift  # Safe operations
+│       │   └── ValidationService.swift   # Project validation
+│       ├── Core/                         # Core utilities and managers
+│       │   ├── XcodeProjUtility.swift    # Coordination layer (~486 lines)
+│       │   ├── XcodeProjService.swift    # Project loading
+│       │   ├── CacheManager.swift        # Performance caching
+│       │   ├── BuildPhaseManager.swift   # Build phase operations
+│       │   └── ProductReferenceManager.swift # Product references
+│       ├── Models/                       # Data structures and error types
+│       └── Utils/                        # Utility functions and helpers
+├── Package.swift                         # Swift Package Manager configuration
+├── ARCHITECTURE.md                       # Detailed architecture documentation
+├── build-universal.sh                    # Universal binary build script
 ├── .github/
 │   └── workflows/
-│       └── release.yml        # Automated release workflow
+│       └── release.yml                   # Automated release workflow
 ├── Tests/
-│   └── xcodeproj-cliTests/    # Swift Package Manager tests (136+ tests)
-│       ├── BasicTests.swift           # Core functionality tests
-│       ├── FileOperationsTests.swift  # File manipulation tests
-│       ├── BuildAndTargetTests.swift  # Target and build configuration tests
-│       ├── ComprehensiveTests.swift   # Complete feature coverage tests
-│       ├── ValidationTests.swift      # Project validation tests
-│       ├── IntegrationTests.swift     # Complex workflow tests
-│       ├── PackageTests.swift         # Swift Package Manager tests
-│       ├── SecurityTests.swift        # Security-focused test coverage
-│       ├── AdditionalTests.swift      # Extended test scenarios
-│       ├── TestHelpers.swift          # Shared test utilities
-│       └── TestResources/             # Test project and sample files
-│           └── TestProject.xcodeproj/ # Test project for validation
-├── README.md                  # This file
-├── CHANGELOG.md              # Version history and changes
-├── LICENSE                   # MIT License
-└── install.sh                # Installation script
+│   └── xcodeproj-cliTests/              # Swift Package Manager tests (372+ tests)
+│       ├── BasicTests.swift              # Core functionality tests
+│       ├── FileOperationsTests.swift     # File manipulation tests
+│       ├── BuildAndTargetTests.swift     # Target and build configuration tests
+│       ├── ComprehensiveTests.swift      # Complete feature coverage tests
+│       ├── ValidationTests.swift         # Project validation tests
+│       ├── IntegrationTests.swift        # Complex workflow tests
+│       ├── PackageTests.swift            # Swift Package Manager tests
+│       ├── SecurityTests.swift           # Security-focused test coverage
+│       ├── AdditionalTests.swift         # Extended test scenarios
+│       ├── CLIRegressionTests/           # CLI behavior regression tests
+│       ├── TestHelpers.swift             # Shared test utilities
+│       └── TestResources/                # Test project and sample files
+│           └── TestProject.xcodeproj/    # Test project for validation
+├── README.md                             # This file
+├── CHANGELOG.md                          # Version history and changes
+├── LICENSE                               # MIT License
+└── install.sh                            # Installation script
 ```
 
 **For Developers**: See [ARCHITECTURE.md](./ARCHITECTURE.md) for detailed information about the modular architecture, design patterns, performance optimizations, and extension points.
@@ -858,6 +891,11 @@ xcodeproj-cli/
   - Created by Kyle Fuller
   - Provides path manipulation utilities
   - Version: 1.0.0+
+
+- **[swift-argument-parser](https://github.com/apple/swift-argument-parser)** (Apache 2.0 License)
+  - Created and maintained by Apple
+  - Provides type-safe CLI argument parsing with auto-generated help
+  - Version: 1.5.0+
 
 ### Inspiration
 - **[xcodeproj-mcp-server](https://github.com/giginet/xcodeproj-mcp-server)** (MIT License)

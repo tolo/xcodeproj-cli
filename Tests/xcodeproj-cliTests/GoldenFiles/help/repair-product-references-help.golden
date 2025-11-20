@@ -1,0 +1,16 @@
+OVERVIEW: Automatically detect and fix missing or broken product references for
+all targets
+
+USAGE: xcodeproj-cli repair-product-references [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] [--targets <targets>]
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --targets <targets>     Comma-separated list of specific targets to repair
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -1,0 +1,14 @@
+OVERVIEW: List Swift Package dependencies in the project
+
+USAGE: xcodeproj-cli list-swift-packages [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run]
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

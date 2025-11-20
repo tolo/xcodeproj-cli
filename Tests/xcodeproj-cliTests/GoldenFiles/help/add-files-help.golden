@@ -1,0 +1,21 @@
+OVERVIEW: Add multiple files to specified groups and targets in batch
+
+USAGE: xcodeproj-cli add-files [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <file-paths> ... [--group <group>] --targets <targets> ...
+
+ARGUMENTS:
+  <file-paths>            File paths to add (use file:group format for per-file
+                          groups, or use --group for all files)
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -g, --group <group>     Group to add all files to (not used with file:group
+                          format)
+  -t, --targets <targets> Target names to add files to
+  --version               Show the version.
+  -h, --help              Show help information.
+

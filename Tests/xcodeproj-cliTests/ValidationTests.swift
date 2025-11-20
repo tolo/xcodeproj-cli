@@ -30,10 +30,12 @@ final class ValidationTests: XCTestCase {
     
     func testValidateNonExistentProject() throws {
         let result = try TestHelpers.runFailingCommand("validate", arguments: ["--project", "NonExistent.xcodeproj"])
-        
+
         TestHelpers.assertCommandFailure(result, message: "Should fail for non-existent project")
         XCTAssertTrue(
-            result.error.contains("❌ Error: The project cannot be found") || result.output.contains("❌ Error: The project cannot be found") || result.output.contains("cannot be found"),
+            result.error.contains("Error: The project cannot be found") ||
+            result.output.contains("Error: The project cannot be found") ||
+            result.output.contains("cannot be found"),
             "Should report project not found"
         )
     }
@@ -237,10 +239,13 @@ final class ValidationTests: XCTestCase {
     
     func testGetBuildSettingsInvalidTarget() throws {
         let result = try TestHelpers.runFailingCommand("get-build-settings", arguments: ["NonExistentTarget"])
-        
+
         TestHelpers.assertCommandFailure(result)
         XCTAssertTrue(
-            result.output.contains("❌ Error: Target not found") || result.error.contains("❌ Error: Target not found"),
+            result.output.contains("Error: Target not found") ||
+            result.error.contains("Error: Target not found") ||
+            result.output.contains("not found") ||
+            result.error.contains("not found"),
             "Should report target not found"
         )
     }

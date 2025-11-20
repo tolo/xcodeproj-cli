@@ -1,0 +1,16 @@
+🔄 Transaction started
+🔧 Build settings for TestApp:
+  Debug:
+    BUNDLE_IDENTIFIER = com.test.TestApp
+    CODE_SIGN_IDENTITY = iPhone Developer
+    DEVELOPMENT_TEAM = ABC123XYZ
+    PRODUCT_BUNDLE_IDENTIFIER = com.test.TestApp
+    PRODUCT_NAME = MyApp
+    SWIFT_VERSION = 5.9
+  Release:
+    BUNDLE_IDENTIFIER = com.test.TestApp
+    CODE_SIGN_IDENTITY = iPhone Developer
+    DEVELOPMENT_TEAM = ABC123XYZ
+    PRODUCT_BUNDLE_IDENTIFIER = com.test.TestApp
+    PRODUCT_NAME = MyApp
+    SWIFT_VERSION = 5.9

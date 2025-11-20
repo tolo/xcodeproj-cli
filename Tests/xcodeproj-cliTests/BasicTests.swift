@@ -46,10 +46,10 @@ final class BasicTests: XCTestCase {
     
     func testVersionCommand() throws {
         let result = try TestHelpers.runCommand("--version", arguments: [])
-        
+
         TestHelpers.assertCommandSuccess(result, message: "Version command should succeed")
-        TestHelpers.assertOutputContains(result.output, "xcodeproj-cli version")
-        TestHelpers.assertOutputContains(result.output, "2.3.0")
+        // ArgumentParser shows just the version number, not "xcodeproj-cli version"
+        TestHelpers.assertOutputContains(result.output, "2.4.0")
     }
     
     func testVersionCommandShortFlag() throws {
@@ -69,18 +69,29 @@ final class BasicTests: XCTestCase {
     
     func testHelpCommand() throws {
         let result = try TestHelpers.runCommand("--help", arguments: [])
-        
+
         TestHelpers.assertCommandSuccess(result, message: "Help command should succeed")
-        TestHelpers.assertOutputContains(result.output, "Usage:")
+        // ArgumentParser uses "USAGE:" instead of "Usage:"
+        XCTAssertTrue(
+            result.output.contains("USAGE:") || result.output.contains("Usage:") || result.output.contains("usage:"),
+            "Expected output to contain usage information but got: \(result.output)"
+        )
         TestHelpers.assertOutputContains(result.output, "xcodeproj-cli")
-        TestHelpers.assertOutputContains(result.output, "command")
+        XCTAssertTrue(
+            result.output.contains("command") || result.output.contains("subcommand"),
+            "Expected output to contain 'command' or 'subcommand' but got: \(result.output)"
+        )
     }
     
     func testHelpCommandShortFlag() throws {
         let result = try TestHelpers.runCommand("-h", arguments: [])
-        
+
         TestHelpers.assertCommandSuccess(result, message: "Short help flag should succeed")
-        TestHelpers.assertOutputContains(result.output, "Usage:")
+        // ArgumentParser uses "USAGE:" instead of "Usage:"
+        XCTAssertTrue(
+            result.output.contains("USAGE:") || result.output.contains("Usage:") || result.output.contains("usage:"),
+            "Expected output to contain usage information but got: \(result.output)"
+        )
         TestHelpers.assertOutputContains(result.output, "xcodeproj-cli")
     }
     
@@ -142,16 +153,18 @@ final class BasicTests: XCTestCase {
     
     func testInvalidCommandHandling() throws {
         let result = try TestHelpers.runCommand("invalid-command-that-does-not-exist", arguments: [])
-        
+
         TestHelpers.assertCommandFailure(result, message: "Invalid commands should fail")
-        
-        // Should provide helpful error message
+
+        // Should provide helpful error message - ArgumentParser uses "Unexpected argument"
         XCTAssertTrue(
-            result.output.contains("Unknown command") || 
+            result.output.contains("Unknown command") ||
             result.output.contains("Invalid") ||
             result.output.contains("not found") ||
+            result.output.contains("Unexpected argument") ||
             result.error.contains("Unknown command") ||
-            result.error.contains("Invalid"),
+            result.error.contains("Invalid") ||
+            result.error.contains("Unexpected argument"),
             "Should provide helpful error for invalid command. Output: \(result.output), Error: \(result.error)"
         )
     }
@@ -161,17 +174,18 @@ final class BasicTests: XCTestCase {
     func testMissingProjectHandling() throws {
         // Test behavior when project file doesn't exist
         let result = try TestHelpers.runCommand("validate", arguments: ["--project", "NonExistent.xcodeproj"])
-        
+
         TestHelpers.assertCommandFailure(result, message: "Should fail when project doesn't exist")
-        
+
         // Should provide helpful error message about missing project
         XCTAssertTrue(
-            result.output.contains("not found") || 
+            result.output.contains("not found") ||
             result.output.contains("does not exist") ||
             result.output.contains("No such file") ||
             result.output.contains("cannot be found") ||
             result.error.contains("not found") ||
-            result.error.contains("does not exist"),
+            result.error.contains("does not exist") ||
+            result.error.contains("cannot be found"),
             "Should provide helpful error for missing project. Output: \(result.output), Error: \(result.error)"
         )
     }

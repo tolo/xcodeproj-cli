@@ -1,0 +1,18 @@
+OVERVIEW: Duplicate an existing scheme
+
+USAGE: xcodeproj-cli duplicate-scheme [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <source-name> <destination-name>
+
+ARGUMENTS:
+  <source-name>           Name of the scheme to duplicate
+  <destination-name>      Name for the new scheme
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

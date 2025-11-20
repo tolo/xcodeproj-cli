@@ -1,0 +1,20 @@
+OVERVIEW: Create a new scheme for a target
+
+USAGE: xcodeproj-cli create-scheme [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <scheme-name> [--target <target>] [--shared] [--user]
+
+ARGUMENTS:
+  <scheme-name>           Name of the scheme to create
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --target <target>       Target to create scheme for (default: scheme name)
+  --shared                Create as shared scheme (default)
+  --user                  Create as user-specific scheme
+  --version               Show the version.
+  -h, --help              Show help information.
+

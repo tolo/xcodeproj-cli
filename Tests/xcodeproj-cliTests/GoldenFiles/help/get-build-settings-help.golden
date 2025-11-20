@@ -1,0 +1,30 @@
+OVERVIEW: Get build settings from a target
+
+Retrieve build settings for a specific target, optionally filtered by
+configuration.
+
+Examples:
+  xcodeproj-cli get-build-settings MyApp
+  xcodeproj-cli get-build-settings MyApp --config Debug
+  xcodeproj-cli get-build-settings --target MyApp --configuration Release
+
+USAGE: xcodeproj-cli get-build-settings [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] [<target-name>] [--target <target>] [--config <config>] [--configuration <configuration>]
+
+ARGUMENTS:
+  <target-name>           Target name (can also use --target flag)
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --target <target>   Target name (alternative to positional argument)
+  -c, --config <config>   Optional: specific configuration name
+  --configuration <configuration>
+                          Optional: specific configuration name (alternative to
+                          --config)
+  --version               Show the version.
+  -h, --help              Show help information.
+

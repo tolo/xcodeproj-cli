@@ -1,0 +1,24 @@
+🔄 Transaction started
+🔍 Checking for invalid file and folder references...
+❌ Found 5 invalid file reference(s):
+
+  Group: Products
+  File:  TestApp.app
+  Issue: File not found at: /tmp/[PATH]
+
+  Group: Sources
+  File:  Sources
+  Issue: Folder not found at: /tmp/[PATH]
+
+  Group: Sources
+  File:  AppDelegate.swift
+  Issue: File not found at: /tmp/[PATH]
+
+  Group: Sources
+  File:  Developer
+  Issue: File not found at: /tmp/[PATH]
+
+  Group: Resources
+  File:  Resources
+  Issue: Folder not found at: /tmp/[PATH]
+

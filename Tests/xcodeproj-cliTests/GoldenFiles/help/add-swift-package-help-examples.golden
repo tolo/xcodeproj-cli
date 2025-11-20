@@ -1,0 +1,21 @@
+OVERVIEW: Add Swift Package dependency to the project
+
+USAGE: xcodeproj-cli add-swift-package [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <url> [--version <version>] [--branch <branch>] [--commit <commit>] [--target <target>]
+
+ARGUMENTS:
+  <url>                   Package repository URL (https:// or git@)
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -v, --version <version> Version requirement (e.g., '1.0.0', 'from: 1.0.0')
+  -b, --branch <branch>   Branch requirement (e.g., 'main', 'develop')
+  -c, --commit <commit>   Commit hash requirement
+  -t, --target <target>   Optional: target to add package to
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -1,0 +1,16 @@
+OVERVIEW: List all schemes in the project
+
+USAGE: xcodeproj-cli list-schemes [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] [--shared] [--user]
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --shared                Show only shared schemes
+  --user                  Show only user-specific schemes
+  --version               Show the version.
+  -h, --help              Show help information.
+

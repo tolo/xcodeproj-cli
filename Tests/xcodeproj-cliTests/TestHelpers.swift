@@ -243,9 +243,18 @@ class TestHelpers {
     
     /// Assert that either output or error contains expected text (more flexible for CLI error handling)
     static func assertOutputOrErrorContains(_ result: CommandResult, _ expectedText: String, file: StaticString = #filePath, line: UInt = #line) {
+        // For ArgumentParser, "required" messages appear as "Missing expected argument"
+        let alternativeTexts = expectedText == "required" ?
+            ["required", "Missing expected argument", "missing"] :
+            [expectedText]
+
+        let found = alternativeTexts.contains { text in
+            result.output.contains(text) || result.error.contains(text)
+        }
+
         XCTAssertTrue(
-            result.output.contains(expectedText) || result.error.contains(expectedText),
-            "Expected output or error to contain '\(expectedText)' but got output: \(result.output) error: \(result.error)",
+            found,
+            "Expected output or error to contain '\(expectedText)' (or alternatives: \(alternativeTexts)) but got output: \(result.output) error: \(result.error)",
             file: file,
             line: line
         )

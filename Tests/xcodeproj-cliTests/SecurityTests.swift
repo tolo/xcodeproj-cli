@@ -7,9 +7,20 @@ final class SecurityTests: XCTestCase {
         return productsDirectory.appendingPathComponent("xcodeproj-cli")
     }
     
+    var createdDirectories: [URL] = []
+    
     override class func setUp() {
         super.setUp()
         // Binary path is now computed, no need to set it
+    }
+    
+    override func tearDown() {
+        // Remove any directories we created during tests (reverse order to remove children first)
+        for directory in createdDirectories.reversed() {
+            try? FileManager.default.removeItem(at: directory)
+        }
+        createdDirectories.removeAll()
+        super.tearDown()
     }
     
     // MARK: - Path Traversal Tests
@@ -37,15 +48,18 @@ final class SecurityTests: XCTestCase {
             
             try process.run()
             process.waitUntilExit()
-            
+
             XCTAssertNotEqual(process.terminationStatus, 0, "Should reject path traversal: \(path)")
-            
-            // Error messages go to stdout in this CLI tool
+
+            // Error messages go to stderr in ArgumentParser CLI
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: outputData, encoding: .utf8) ?? ""
+            let error = String(data: errorData, encoding: .utf8) ?? ""
+            let combined = output + error
             XCTAssertTrue(
-                output.contains("Invalid file path") || output.contains("Error") || output.contains("Invalid"), 
-                "Should show error for dangerous path: \(path). Got: \(output)"
+                combined.contains("Invalid file path") || combined.contains("Error") || combined.contains("Invalid"),
+                "Should show error for dangerous path: \(path). Got stdout: \(output) stderr: \(error)"
             )
         }
     }
@@ -113,12 +127,16 @@ final class SecurityTests: XCTestCase {
             let testDir = URL(fileURLWithPath: "Tests/xcodeproj-cliTests/TestResources")
             let filePath = testDir.appendingPathComponent(path)
             
-            // Create directories if needed
-            try FileManager.default.createDirectory(
-                at: filePath.deletingLastPathComponent(),
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
+            // Create directories if needed and track only those we created
+            let directoryPath = filePath.deletingLastPathComponent()
+            if !FileManager.default.fileExists(atPath: directoryPath.path) {
+                try FileManager.default.createDirectory(
+                    at: directoryPath,
+                    withIntermediateDirectories: true,
+                    attributes: nil
+                )
+                createdDirectories.append(directoryPath)
+            }
             
             // Create the file
             try "// Test".write(to: filePath, atomically: true, encoding: .utf8)
@@ -177,16 +195,19 @@ final class SecurityTests: XCTestCase {
             
             try process.run()
             process.waitUntilExit()
-            
+
             // Check if the dangerous setting was properly rejected
             let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
             let output = String(data: outputData, encoding: .utf8) ?? ""
-            
+            let error = String(data: errorData, encoding: .utf8) ?? ""
+            let combined = output + error
+
             // Dangerous settings should be rejected
             XCTAssertNotEqual(process.terminationStatus, 0, "Should reject dangerous setting: \(key)=\(value)")
             XCTAssertTrue(
-                output.contains("potentially dangerous") || output.contains("Error") || output.contains("Invalid"),
-                "Should show security error for dangerous setting \(key)=\(value). Got: \(output)"
+                combined.contains("potentially dangerous") || combined.contains("Error") || combined.contains("Invalid"),
+                "Should show security error for dangerous setting \(key)=\(value). Got stdout: \(output) stderr: \(error)"
             )
         }
     }
@@ -234,14 +255,17 @@ final class SecurityTests: XCTestCase {
         
         try process.run()
         process.waitUntilExit()
-        
+
         let outputData = outputPipe.fileHandleForReading.readDataToEndOfFile()
+        let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
         let output = String(data: outputData, encoding: .utf8) ?? ""
-        
+        let error = String(data: errorData, encoding: .utf8) ?? ""
+        let combined = output + error
+
         XCTAssertNotEqual(process.terminationStatus, 0, "Should reject extremely long paths")
         XCTAssertTrue(
-            output.contains("too long") || output.contains("maximum") || output.contains("Invalid") || output.contains("Error"),
-            "Should show appropriate error message for long path. Got: \(output)"
+            combined.contains("too long") || combined.contains("maximum") || combined.contains("Invalid") || combined.contains("Error"),
+            "Should show appropriate error message for long path. Got stdout: \(output) stderr: \(error)"
         )
     }
     

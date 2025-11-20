@@ -1,0 +1,8 @@
+🔄 Transaction started
+TestProject
+├── Products
+│   └── TestApp.app (TestApp.app)
+├── Sources
+│   ├── AppDelegate.swift (Sources/AppDelegate.swift)
+│   └── Developer (Sources/Developer)
+└── Resources

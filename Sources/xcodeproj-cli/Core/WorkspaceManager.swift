@@ -13,12 +13,16 @@ import Foundation
 @MainActor
 class WorkspaceManager {
   private let workingDirectory: Path
+  private let workspacePath: Path?
   private let transactionManager: TransactionManager?
 
   init(
-    workingDirectory: String = FileManager.default.currentDirectoryPath, projectPath: String? = nil
+    workingDirectory: String = FileManager.default.currentDirectoryPath,
+    workspacePath: String? = nil,
+    projectPath: String? = nil
   ) {
     self.workingDirectory = Path(workingDirectory)
+    self.workspacePath = workspacePath.map { Path($0) }
     self.transactionManager = projectPath.map { TransactionManager(projectPath: Path($0)) }
   }
 
@@ -55,12 +59,21 @@ class WorkspaceManager {
     // Validate user input for security
     let validatedWorkspaceName = try SecurityUtils.validateString(name)
 
-    let workspacePath = workingDirectory + "\(validatedWorkspaceName).xcworkspace"
+    // Priority: explicit workspacePath > name in working directory
+    let targetPath: Path
+    if let explicitPath = workspacePath {
+      targetPath = explicitPath
+    } else {
+      let workspaceName = validatedWorkspaceName.hasSuffix(".xcworkspace")
+        ? validatedWorkspaceName
+        : "\(validatedWorkspaceName).xcworkspace"
+      targetPath = workingDirectory + workspaceName
+    }
 
     // Check if workspace already exists
-    if workspacePath.exists {
+    if targetPath.exists {
       throw ProjectError.operationFailed(
-        "Workspace '\(validatedWorkspaceName)' already exists at \(workspacePath)")
+        "Workspace already exists at \(targetPath)")
     }
 
     // Create workspace with self-reference
@@ -71,9 +84,9 @@ class WorkspaceManager {
     workspace.data.children.append(.file(selfReference))
 
     // Save the workspace
-    try workspace.write(path: workspacePath, override: false)
+    try workspace.write(path: targetPath, override: false)
 
-    print("✅ Created workspace: \(validatedWorkspaceName).xcworkspace")
+    print("✅ Created workspace: \(targetPath.lastComponent)")
 
     return workspace
   }
@@ -319,6 +332,10 @@ class WorkspaceManager {
 
   private func findWorkspace(name: String) -> Path {
     // Note: This is a private method, so the name should already be validated by the calling methods
+    // Priority: explicit workspacePath > positional name argument > working directory
+    if let explicitPath = workspacePath {
+      return explicitPath
+    }
     let workspaceName = name.hasSuffix(".xcworkspace") ? name : "\(name).xcworkspace"
     return workingDirectory + workspaceName
   }

@@ -1,0 +1,38 @@
+OVERVIEW: Create group hierarchies in the project
+
+Creates one or more group hierarchies in the Xcode project.
+Group paths support nested hierarchies with forward slashes.
+
+Examples:
+  # Create simple groups
+  xcodeproj-cli create-groups Models Views
+
+  # Create nested structures
+  xcodeproj-cli create-groups Sources/Models Sources/Views
+  xcodeproj-cli create-groups Utils/Network Utils/Storage
+
+  # Real-world iOS app structure
+  xcodeproj-cli create-groups \
+    MyApp/Source/Application \
+    MyApp/Source/Features/Authentication/Views \
+    MyApp/Source/Features/Authentication/ViewModels \
+    MyApp/Resources
+
+To see created groups:
+  xcodeproj-cli list-groups --show-names
+
+USAGE: xcodeproj-cli create-groups [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <group-paths> ...
+
+ARGUMENTS:
+  <group-paths>           One or more group paths to create
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -2,14 +2,19 @@
 .DS_Store
 
 # Swift
-.build/
 *.xcodeproj
 !Tests/xcodeproj-cliTests/TestResources/TestProject.xcodeproj
 Package.resolved
 
-# Cache
+# Cache / build artifacts
 *.swiftpm
 DerivedData/
+.build/
+/xcodeproj-cli
+
+# Code coverage
+*.profraw
+default.profraw
 
 # Backup files
 *.backup
@@ -18,11 +23,13 @@ DerivedData/
 
 # Ignore generated test project backups and temporary test files
 Tests/xcodeproj-cliTests/TestResources/TestProject.xcodeproj.backup/
+Tests/xcodeproj-cliTests/TestResources/TestProject.xcodeproj.transaction/
 Tests/xcodeproj-cliTests/TestResources/MyFolder/
 Tests/xcodeproj-cliTests/TestResources/TestFolder/
 
 # Claude Code
 .claude/settings.local.json
-ai_docs/temp
-.claude/agents/custom
-.claude/commands
+ai_docs/
+.claude/agents/
+.claude/commands/
+.swift-module-cache

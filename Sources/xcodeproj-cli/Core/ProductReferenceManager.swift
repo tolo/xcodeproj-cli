@@ -16,9 +16,9 @@ class ProductReferenceManager {
   {
     let productName =
       target.productNameForReference() ?? "\(target.name).\(productType.fileExtension ?? "app")"
-    
+
     // Validate the generated product name for security
-    try ProductCommandBase.validateProductNameSecurity(productName)
+    try SecurityUtils.validateProductNameSecurity(productName)
 
     let productRef = PBXFileReference(
       sourceTree: .buildProductsDir,
@@ -80,7 +80,7 @@ class ProductReferenceManager {
         guard let productType = target.productType else {
           throw ProjectError.invalidConfiguration("Target '\(target.name)' has no product type")
         }
-        
+
         // Create and link product reference
         let productRef = try createProductReference(for: target, productType: productType)
         target.product = productRef
@@ -151,7 +151,7 @@ class ProductReferenceManager {
       if let index = productsGroup.children.firstIndex(of: product) {
         productsGroup.children.remove(at: index)
       }
-      
+
       // Remove from pbxproj objects
       pbxproj.delete(object: product)
     }
@@ -167,10 +167,10 @@ class ProductReferenceManager {
       print("ℹ️  Target already has a product reference")
       return
     }
-    
+
     // Validate product name if provided using the shared validation
     if let name = productName {
-      try ProductCommandBase.validateProductNameSecurity(name)
+      try SecurityUtils.validateProductNameSecurity(name)
     }
 
     let actualProductType = productType ?? target.productType ?? .application
@@ -250,12 +250,12 @@ class ProductReferenceManager {
     {
       return versionString
     }
-    
+
     // Check environment variable override
     if let envSwiftVersion = ProcessInfo.processInfo.environment["XCODEPROJ_CLI_SWIFT_VERSION"] {
       return envSwiftVersion
     }
-    
+
     // Try to detect current Swift version from runtime
     if #available(macOS 10.15, *) {
       // Use Swift version constants available at runtime
@@ -269,7 +269,7 @@ class ProductReferenceManager {
         return "5.7"
       #endif
     }
-    
+
     // Final fallback
     return "6.0"
   }
@@ -369,4 +369,3 @@ extension PBXProductType {
     }
   }
 }
-

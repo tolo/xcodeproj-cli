@@ -52,7 +52,31 @@ enum ProjectError: Error, CustomStringConvertible {
     case .fileAlreadyExists(let path):
       return "File already exists: \(path)"
     case .groupNotFound(let name):
-      return "Group not found: \(name). Use 'create-groups' to create the group first."
+      let hasSlashes = name.contains("/")
+
+      if hasSlashes {
+        // User tried path but it didn't resolve
+        return """
+          Group not found: '\(name)'
+
+          The path '\(name)' could not be resolved to an existing group.
+
+          To fix this:
+            • Run 'list-groups --show-names' to see valid paths and names
+            • Create the hierarchy first: 'create-groups \(name)'
+            • Try using just the last component: '\(name.split(separator: "/").last ?? "")'
+          """
+      } else {
+        // User tried simple name
+        return """
+          Group not found: '\(name)'
+
+          To fix this:
+            • Run 'list-groups --show-names' to see all available groups
+            • Create the group: 'create-groups \(name)'
+            • Try using a full path if the group is nested
+          """
+      }
     case .targetNotFound(let name):
       return "Target not found: \(name). Use 'list-targets' to see available targets."
     case .invalidArguments(let msg):

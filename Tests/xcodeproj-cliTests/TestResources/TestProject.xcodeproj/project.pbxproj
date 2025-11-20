@@ -7,14 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		06A3C7ADFFBD878852111525 /* sudoers in Resources */ = {isa = PBXBuildFile; fileRef = 75434430FB1EA1CC077F7C15 /* sudoers */; };
+		1267C7A5CCF29E97ACDBF277 /* LaunchDaemons in Resources */ = {isa = PBXBuildFile; fileRef = C4153BC4EAC17C55BCE3E3CE /* LaunchDaemons */; };
+		224A7A657311747FD1EEA0C7 /* sudo in Resources */ = {isa = PBXBuildFile; fileRef = 6C7AC74CA40995653106E081 /* sudo */; };
+		3B1B705F2B937FF064A9DA2F /* sudo in Resources */ = {isa = PBXBuildFile; fileRef = 2835A536021FE6932D8925B5 /* sudo */; };
+		677CD2BA744C2CA90C2BEA4E /* LaunchDaemons in Resources */ = {isa = PBXBuildFile; fileRef = 76BD0A7D671C5F17779039E3 /* LaunchDaemons */; };
+		6AA8E1BFC2EADA3D3E88E89C /* passwd in Resources */ = {isa = PBXBuildFile; fileRef = 33642E03FADD0198598F1530 /* passwd */; };
+		993DD1B4D7D0ADFC02B10B22 /* Foundation.framework in Resources */ = {isa = PBXBuildFile; fileRef = 83593394428D1B82E15B9309 /* Foundation.framework */; };
+		999B81CFF3171F56522E852E /* passwd in Resources */ = {isa = PBXBuildFile; fileRef = AD706A6C4B7666B5414CEFEF /* passwd */; };
 		9BB51926BC5467A01989BBCF /* Developer in Resources */ = {isa = PBXBuildFile; fileRef = 97999C7740011E276CD5ACA5 /* Developer */; };
 		A1234567890123456789013A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1234567890123456789013B /* AppDelegate.swift */; };
+		AC0FF1E64693E5E24B2D53D0 /* Foundation.framework in Resources */ = {isa = PBXBuildFile; fileRef = C4C3390DBDB0532AB8605A6A /* Foundation.framework */; };
+		CD81949F9DC2ED74538E52AC /* sudoers in Resources */ = {isa = PBXBuildFile; fileRef = D2E1219C5E64E0B7C5018DD8 /* sudoers */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		2835A536021FE6932D8925B5 /* sudo */ = {isa = PBXFileReference; lastKnownFileType = text; path = sudo; sourceTree = "<group>"; };
+		33642E03FADD0198598F1530 /* passwd */ = {isa = PBXFileReference; lastKnownFileType = text; path = passwd; sourceTree = "<group>"; };
+		6C7AC74CA40995653106E081 /* sudo */ = {isa = PBXFileReference; lastKnownFileType = text; name = sudo; path = ../../../../../../../../../usr/bin/sudo; sourceTree = "<group>"; };
+		75434430FB1EA1CC077F7C15 /* sudoers */ = {isa = PBXFileReference; lastKnownFileType = text; name = sudoers; path = ../../../../../../../../../etc/sudoers; sourceTree = "<group>"; };
+		76BD0A7D671C5F17779039E3 /* LaunchDaemons */ = {isa = PBXFileReference; lastKnownFileType = text; name = LaunchDaemons; path = ../../../../../../../../../System/Library/LaunchDaemons; sourceTree = "<group>"; };
+		83593394428D1B82E15B9309 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = ../../../../../../../../../System/Library/Frameworks/Foundation.framework; sourceTree = "<group>"; };
 		97999C7740011E276CD5ACA5 /* Developer */ = {isa = PBXFileReference; lastKnownFileType = text; path = Developer; sourceTree = "<group>"; };
 		A1234567890123456789013B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		A1234567890123456789013C /* TestApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TestApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD706A6C4B7666B5414CEFEF /* passwd */ = {isa = PBXFileReference; lastKnownFileType = text; name = passwd; path = ../../../../../../../../../etc/passwd; sourceTree = "<group>"; };
+		C4153BC4EAC17C55BCE3E3CE /* LaunchDaemons */ = {isa = PBXFileReference; lastKnownFileType = text; path = LaunchDaemons; sourceTree = "<group>"; };
+		C4C3390DBDB0532AB8605A6A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Foundation.framework; sourceTree = "<group>"; };
+		D2E1219C5E64E0B7C5018DD8 /* sudoers */ = {isa = PBXFileReference; lastKnownFileType = text; path = sudoers; sourceTree = "<group>"; };
+		DC61BDFC14791A5A23BAF127 /* DataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -28,6 +49,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		27B4EBC4E58C7046A78E2E70 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = ViewModels;
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		A1234567890123456789012A /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -42,6 +71,7 @@
 				A1234567890123456789012A /* Products */,
 				A1234567890123456789013E /* Sources */,
 				A1234567890123456789013F /* Resources */,
+				27B4EBC4E58C7046A78E2E70 /* ViewModels */,
 			);
 			sourceTree = "<group>";
 		};
@@ -50,6 +80,17 @@
 			children = (
 				A1234567890123456789013B /* AppDelegate.swift */,
 				97999C7740011E276CD5ACA5 /* Developer */,
+				DC61BDFC14791A5A23BAF127 /* DataModel.swift */,
+				C4C3390DBDB0532AB8605A6A /* Foundation.framework */,
+				33642E03FADD0198598F1530 /* passwd */,
+				C4153BC4EAC17C55BCE3E3CE /* LaunchDaemons */,
+				2835A536021FE6932D8925B5 /* sudo */,
+				D2E1219C5E64E0B7C5018DD8 /* sudoers */,
+				83593394428D1B82E15B9309 /* Foundation.framework */,
+				AD706A6C4B7666B5414CEFEF /* passwd */,
+				76BD0A7D671C5F17779039E3 /* LaunchDaemons */,
+				6C7AC74CA40995653106E081 /* sudo */,
+				75434430FB1EA1CC077F7C15 /* sudoers */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -118,6 +159,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				9BB51926BC5467A01989BBCF /* Developer in Resources */,
+				AC0FF1E64693E5E24B2D53D0 /* Foundation.framework in Resources */,
+				6AA8E1BFC2EADA3D3E88E89C /* passwd in Resources */,
+				1267C7A5CCF29E97ACDBF277 /* LaunchDaemons in Resources */,
+				3B1B705F2B937FF064A9DA2F /* sudo in Resources */,
+				CD81949F9DC2ED74538E52AC /* sudoers in Resources */,
+				993DD1B4D7D0ADFC02B10B22 /* Foundation.framework in Resources */,
+				999B81CFF3171F56522E852E /* passwd in Resources */,
+				677CD2BA744C2CA90C2BEA4E /* LaunchDaemons in Resources */,
+				224A7A657311747FD1EEA0C7 /* sudo in Resources */,
+				06A3C7ADFFBD878852111525 /* sudoers in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

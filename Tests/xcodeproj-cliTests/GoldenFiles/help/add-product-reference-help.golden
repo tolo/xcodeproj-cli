@@ -1,0 +1,20 @@
+OVERVIEW: Manually add or update a product reference for a specific target
+
+USAGE: xcodeproj-cli add-product-reference [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <target-name> [--name <name>] [--type <type>]
+
+ARGUMENTS:
+  <target-name>           Name of the target to add product reference to
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --name <name>           Custom name for the product (optional)
+  --type <type>           Product type (e.g.,
+                          com.apple.product-type.application)
+  --version               Show the version.
+  -h, --help              Show help information.
+

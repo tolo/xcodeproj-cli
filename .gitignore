@@ -25,4 +25,4 @@ Tests/xcodeproj-cliTests/TestResources/TestFolder/
 .claude/settings.local.json
 ai_docs/temp
 .claude/agents/custom
-.claude/commands
+.claude/commands/custom

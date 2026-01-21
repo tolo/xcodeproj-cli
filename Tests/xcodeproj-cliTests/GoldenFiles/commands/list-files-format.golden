@@ -4,16 +4,4 @@
 📁 Sources/
   - AppDelegate.swift
   - Developer
-  - DataModel.swift
-  - Foundation.framework
-  - passwd
-  - LaunchDaemons
-  - sudo
-  - sudoers
-  - ../../../../../../../../../System/Library/Frameworks/Foundation.framework
-  - ../../../../../../../../../etc/passwd
-  - ../../../../../../../../../System/Library/LaunchDaemons
-  - ../../../../../../../../../usr/bin/sudo
-  - ../../../../../../../../../etc/sudoers
 📁 Resources/
-📁 ViewModels/

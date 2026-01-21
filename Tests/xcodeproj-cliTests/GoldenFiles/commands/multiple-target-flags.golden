@@ -1,15 +1,5 @@
 📁 Files in target 'TestApp':
-  - ../../../../../../../../../System/Library/Frameworks/Foundation.framework
-  - ../../../../../../../../../System/Library/LaunchDaemons
-  - ../../../../../../../../../etc/passwd
-  - ../../../../../../../../../etc/sudoers
-  - ../../../../../../../../../usr/bin/sudo
   - AppDelegate.swift
   - Developer
-  - Foundation.framework
-  - LaunchDaemons
-  - passwd
-  - sudo
-  - sudoers
 
-Total: 12 file(s)
+Total: 2 file(s)

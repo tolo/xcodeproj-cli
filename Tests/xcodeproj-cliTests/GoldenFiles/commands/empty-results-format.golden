@@ -1,55 +1,11 @@
 🔍 Checking for invalid file and folder references...
-❌ Found 13 invalid file reference(s):
+❌ Found 2 invalid file reference(s):
 
   Group: Products
   File:  TestApp.app
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  Sources
-  Issue: Folder not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  AppDelegate.swift
-  Issue: File not found at: /tmp/[PATH]
+  Issue: File not found at: /Users/tobias/Repos/Libs/xcodeproj-cli/Tests/xcodeproj-cliTests/TestResources/TestApp.app
 
   Group: Sources
   File:  Developer
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  DataModel.swift
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  Foundation.framework
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  passwd
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  LaunchDaemons
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  sudo
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  sudoers
-  Issue: File not found at: /tmp/[PATH]
-
-  Group: Sources
-  File:  ../../../../../../../../../System/Library/LaunchDaemons
-  Issue: Expected file but found directory at: /System/Library/LaunchDaemons
-
-  Group: Resources
-  File:  Resources
-  Issue: Folder not found at: /tmp/[PATH]
-
-  Group: ViewModels
-  File:  ViewModels
-  Issue: Folder not found at: /tmp/[PATH]
+  Issue: File not found at: /Users/tobias/Repos/Libs/xcodeproj-cli/Tests/xcodeproj-cliTests/TestResources/Sources/Developer
 

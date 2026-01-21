@@ -3,17 +3,5 @@ TestProject
 │   └── TestApp.app (TestApp.app)
 ├── Sources
 │   ├── AppDelegate.swift (Sources/AppDelegate.swift)
-│   ├── Developer (Sources/Developer)
-│   ├── DataModel.swift (Sources/DataModel.swift)
-│   ├── Foundation.framework (Sources/Foundation.framework) [folder reference]
-│   ├── passwd (Sources/passwd)
-│   ├── LaunchDaemons (Sources/LaunchDaemons)
-│   ├── sudo (Sources/sudo)
-│   ├── sudoers (Sources/sudoers)
-│   ├── Foundation.framework (Sources/../../../../../../../../../System/Library/Frameworks/Foundation.framework) [folder reference]
-│   ├── passwd (Sources/../../../../../../../../../etc/passwd)
-│   ├── LaunchDaemons (Sources/../../../../../../../../../System/Library/LaunchDaemons)
-│   ├── sudo (Sources/../../../../../../../../../usr/bin/sudo)
-│   └── sudoers (Sources/../../../../../../../../../etc/sudoers)
-├── Resources
-└── ViewModels
+│   └── Developer (Sources/Developer)
+└── Resources

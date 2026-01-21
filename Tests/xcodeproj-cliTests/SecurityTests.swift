@@ -9,17 +9,20 @@ final class SecurityTests: XCTestCase {
     
     var createdDirectories: [URL] = []
     
-    override class func setUp() {
+    override func setUp() {
         super.setUp()
-        // Binary path is now computed, no need to set it
+        // Backup test project before each test to ensure isolation
+        try? TestHelpers.backupTestProject()
     }
-    
+
     override func tearDown() {
         // Remove any directories we created during tests (reverse order to remove children first)
         for directory in createdDirectories.reversed() {
             try? FileManager.default.removeItem(at: directory)
         }
         createdDirectories.removeAll()
+        // Restore test project after each test
+        try? TestHelpers.restoreTestProject()
         super.tearDown()
     }
     

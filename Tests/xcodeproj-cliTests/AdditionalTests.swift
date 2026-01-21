@@ -9,7 +9,21 @@ import XCTest
 import Foundation
 
 final class AdditionalTests: XCTestCase {
-    
+
+    // MARK: - Setup and Teardown
+
+    override func setUp() {
+        super.setUp()
+        // Backup test project before each test to ensure isolation
+        try? TestHelpers.backupTestProject()
+    }
+
+    override func tearDown() {
+        // Restore test project after each test
+        try? TestHelpers.restoreTestProject()
+        super.tearDown()
+    }
+
     // MARK: - Argument Parsing Edge Cases
     
     func testEmptyArguments() throws {

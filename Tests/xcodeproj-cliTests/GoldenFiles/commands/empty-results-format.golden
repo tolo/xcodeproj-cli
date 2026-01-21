@@ -3,9 +3,9 @@
 
   Group: Products
   File:  TestApp.app
-  Issue: File not found at: /Users/tobias/Repos/Libs/xcodeproj-cli/Tests/xcodeproj-cliTests/TestResources/TestApp.app
+  Issue: File not found at: /tmp/[PATH]/TestApp.app
 
   Group: Sources
   File:  Developer
-  Issue: File not found at: /Users/tobias/Repos/Libs/xcodeproj-cli/Tests/xcodeproj-cliTests/TestResources/Sources/Developer
+  Issue: File not found at: /tmp/[PATH]/Sources/Developer
 

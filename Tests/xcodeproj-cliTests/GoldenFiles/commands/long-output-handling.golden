@@ -2,7 +2,6 @@ TestProject
 ├── Products
 ├── Sources
 ├── Resources
-├── ViewModels
 └── LongTest
     ├── Group1
     ├── Group2

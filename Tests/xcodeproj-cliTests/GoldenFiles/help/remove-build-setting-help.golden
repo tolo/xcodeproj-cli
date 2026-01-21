@@ -1,0 +1,25 @@
+OVERVIEW: Remove build setting from specified targets
+
+Remove a build setting key from one or more targets.
+
+Examples:
+  xcodeproj-cli remove-build-setting SWIFT_VERSION --targets MyApp,MyTests
+  xcodeproj-cli remove-build-setting CODE_SIGN_IDENTITY -t MyApp -c Debug
+
+USAGE: xcodeproj-cli remove-build-setting [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <key> --targets <targets> [--config <config>]
+
+ARGUMENTS:
+  <key>                   Build setting key to remove
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --targets <targets> Comma-separated list of target names
+  -c, --config <config>   Optional: specific configuration name
+  --version               Show the version.
+  -h, --help              Show help information.
+

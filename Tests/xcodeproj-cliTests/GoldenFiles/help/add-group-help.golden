@@ -1,0 +1,24 @@
+OVERVIEW: Add empty virtual groups (alias of create-groups)
+
+Adds one or more virtual groups to the Xcode project. This is an alias of the
+create-groups command.
+
+Examples:
+  xcodeproj-cli add-group UI/Components Services/API
+  xcodeproj-cli add-group Architecture/Models Architecture/Views
+
+USAGE: xcodeproj-cli add-group [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <group-paths> ...
+
+ARGUMENTS:
+  <group-paths>           One or more group paths to create
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

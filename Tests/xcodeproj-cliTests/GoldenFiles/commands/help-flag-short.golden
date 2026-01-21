@@ -21,6 +21,7 @@ SUBCOMMANDS:
                           batch
   add-sync-folder         Add a synchronized folder that maintains sync with
                           filesystem
+  add-group               Add empty virtual groups (alias of create-groups)
   create-groups           Create group hierarchies in the project
   list-groups             List groups in the project as a tree structure
   remove-group            Remove a group and its contents from the project
@@ -35,6 +36,7 @@ SUBCOMMANDS:
   list-targets            List all targets in the project with their product
                           types
   set-build-setting       Set build setting on specified targets
+  remove-build-setting    Remove build setting from specified targets
   get-build-settings      Get build settings from a target
   list-build-settings     List build settings for project or target
   list-build-configs      List build configurations for a target or the project

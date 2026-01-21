@@ -1,4 +1,3 @@
-🔄 Transaction started
 🔧 Build settings for TestApp:
   Debug:
     BUNDLE_IDENTIFIER = com.test.TestApp

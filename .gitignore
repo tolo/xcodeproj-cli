@@ -28,6 +28,11 @@ Tests/xcodeproj-cliTests/TestResources/TestProject.xcodeproj.transaction/
 Tests/xcodeproj-cliTests/TestResources/MyFolder/
 Tests/xcodeproj-cliTests/TestResources/TestFolder/
 
+# Ignore workspace and project artifacts created during tests (root only)
+/TestWorkspace.xcworkspace/
+/Test*.xcodeproj/
+/Test*.xcworkspace/
+
 # Claude Code
 .claude/settings.local.json
 ai_docs/

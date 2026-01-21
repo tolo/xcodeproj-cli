@@ -333,13 +333,4 @@ struct SecurityUtils {
       throw ProjectError.invalidArguments("Product name cannot contain null bytes")
     }
   }
-
-  /// Sanitize path using PathUtils validation (avoiding circular imports) - DEPRECATED
-  private static func deprecatedSanitizePath(_ path: String) -> String? {
-    // Basic path traversal check (subset of PathUtils logic to avoid circular import)
-    if path.contains("../") || path.contains("..\\") || path.hasPrefix("../") {
-      return nil
-    }
-    return path
-  }
 }

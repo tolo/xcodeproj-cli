@@ -1,0 +1,16 @@
+OVERVIEW: Comprehensive project repair command that fixes multiple corruption
+types
+
+USAGE: xcodeproj-cli repair-project [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] [--backup]
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --backup                Create backup before making changes
+  --version               Show the version.
+  -h, --help              Show help information.
+

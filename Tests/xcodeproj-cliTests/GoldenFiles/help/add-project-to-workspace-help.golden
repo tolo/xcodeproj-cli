@@ -1,0 +1,18 @@
+OVERVIEW: Add a project to an existing workspace
+
+USAGE: xcodeproj-cli add-project-to-workspace [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <workspace-name> <project-path>
+
+ARGUMENTS:
+  <workspace-name>        Name of the workspace (without .xcworkspace extension)
+  <project-path>          Path to the project to add
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -286,78 +286,6 @@ final class ProductReferenceTests: XCTestCase {
         XCTAssertTrue(productsGroup!.children.contains { $0.name == "CustomApp.app" })
     }
     
-    // MARK: - Command Tests
-    
-    @MainActor
-    func testRepairProductReferencesCommand() throws {
-        try setupUtility()
-        // Create target
-        let target = PBXNativeTarget(
-            name: "LegacyApp",
-            productName: "LegacyApp",
-            productType: .application
-        )
-        utility.pbxproj.add(object: target)
-        utility.pbxproj.rootObject?.targets.append(target)
-        
-        // Run repair command - should work with v9.4.3
-        let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
-        
-        // Should now succeed
-        XCTAssertNoThrow(try RepairProductReferencesCommand.execute(with: args, utility: utility))
-    }
-    
-    @MainActor
-    func testValidateProductsCommand() throws {
-        try setupUtility()
-        // Create target
-        let target = PBXNativeTarget(
-            name: "UnreferencedApp",
-            productName: "UnreferencedApp",
-            productType: .application
-        )
-        utility.pbxproj.add(object: target)
-        utility.pbxproj.rootObject?.targets.append(target)
-        
-        // Save the project to test validation
-        try utility.save()
-        
-        // Run validate command (should not throw since it's read-only)
-        let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
-        
-        XCTAssertNoThrow(try ValidateProductsCommand.execute(with: args, utility: utility))
-    }
-    
-    @MainActor
-    func testAddProductReferenceCommand() throws {
-        try setupUtility()
-        // Add target using modern method (should have product reference)
-        try utility.addTarget(name: "ModernApp", productType: "com.apple.product-type.application", bundleId: "com.example.ModernApp")
-        
-        // Run add-product-reference command to update it
-        let args = ParsedArguments(
-            positional: ["ModernApp"],
-            flags: ["name": "CustomModernApp.app"],
-            boolFlags: []
-        )
-        
-        try AddProductReferenceCommand.execute(with: args, utility: utility)
-        
-        // Verify Products group exists and may contain the reference
-        // Note: Product reference should now be properly linked with v9.4.3
-        let productsGroup = utility.pbxproj.rootObject?.productsGroup
-        XCTAssertNotNil(productsGroup)
-        
-        // Check if the reference exists somewhere in the project (more lenient check)
-        let hasCustomModernApp = productsGroup!.children.contains { $0.name == "CustomModernApp.app" } ||
-                                productsGroup!.children.contains { $0.path == "CustomModernApp.app" }
-        
-        if !hasCustomModernApp {
-            // If the exact reference isn't found, at least verify the command executed without throwing
-            // Product reference is now properly linked to the target
-        }
-    }
-    
     // MARK: - Integration Tests
     
     @MainActor
@@ -723,10 +651,10 @@ final class ProductReferenceTests: XCTestCase {
         }
     }
     
-    // MARK: - Performance Tests
-    
+    // MARK: - Scalability Tests
+
     @MainActor
-    func testPerformanceLargeProjectValidation() throws {
+    func testValidateManyTargets() throws {
         try setupUtility()
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
         
@@ -759,7 +687,7 @@ final class ProductReferenceTests: XCTestCase {
     }
     
     @MainActor
-    func testPerformanceLargeProjectOrphanedProducts() throws {
+    func testFindManyOrphanedProducts() throws {
         try setupUtility()
         let productManager = ProductReferenceManager(pbxproj: utility.pbxproj)
         
@@ -1010,24 +938,6 @@ final class ProductReferenceTests: XCTestCase {
         XCTAssertNotNil(issues)
     }
     
-    @MainActor
-    func testRepairProjectCommand() throws {
-        try setupUtility()
-        // Create target
-        let target1 = PBXNativeTarget(
-            name: "BrokenApp",
-            productName: "BrokenApp",
-            productType: .application
-        )
-        utility.pbxproj.add(object: target1)
-        utility.pbxproj.rootObject?.targets.append(target1)
-        
-        // Run repair project command - should work with v9.4.3
-        let args = ParsedArguments(positional: [], flags: [:], boolFlags: [])
-        
-        // Should now succeed
-        XCTAssertNoThrow(try RepairProjectCommand.execute(with: args, utility: utility))
-    }
 }
 
 // MARK: - PBXNativeTarget Extension

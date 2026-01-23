@@ -106,10 +106,10 @@ final class WorkspaceTests: XCTProjectTestCase {
         return FileManager.default.fileExists(atPath: workspacePath)
     }
     
-    // MARK: - Create Workspace Tests
+  // MARK: - Create Workspace Tests
     
-    func testCreateWorkspaceBasic() throws {
-        let workspaceName = "TestWorkspace"
+  func testCreateWorkspaceBasic() throws {
+        let workspaceName = "TestWorkspace-\(UUID().uuidString)"
         let workspaceURL = URL(fileURLWithPath: "\(workspaceName).xcworkspace")
         createdWorkspaces.append(workspaceURL)
         
@@ -440,4 +440,3 @@ final class WorkspaceTests: XCTProjectTestCase {
         }
     }
 }
-

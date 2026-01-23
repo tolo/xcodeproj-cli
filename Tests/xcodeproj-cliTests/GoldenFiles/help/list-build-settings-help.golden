@@ -1,0 +1,35 @@
+OVERVIEW: List build settings for project or target
+
+List build settings with various filtering options. Without --target, shows
+project-level settings.
+
+Examples:
+  xcodeproj-cli list-build-settings
+  xcodeproj-cli list-build-settings --target MyApp
+  xcodeproj-cli list-build-settings --target MyApp --config Debug
+  xcodeproj-cli list-build-settings -t MyApp -c Release --json
+  xcodeproj-cli list-build-settings --all --show-inherited
+
+Notes:
+  - Without --target, shows project-level settings
+  - Without --config, shows all configurations
+  - JSON output is useful for automated processing
+
+USAGE: xcodeproj-cli list-build-settings [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] [--target <target>] [--config <config>] [--show-inherited] [--json] [--all]
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --target <target>   Target name (optional, shows project settings if
+                          omitted)
+  -c, --config <config>   Configuration name (optional, shows all if omitted)
+  -i, --show-inherited    Show inherited settings from project
+  -j, --json              Output in JSON format
+  -a, --all               Show all settings including default values
+  --version               Show the version.
+  -h, --help              Show help information.
+

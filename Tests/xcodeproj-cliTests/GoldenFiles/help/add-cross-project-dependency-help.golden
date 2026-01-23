@@ -1,0 +1,20 @@
+OVERVIEW: Add a dependency on a target in another project
+
+USAGE: xcodeproj-cli add-cross-project-dependency [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <target-name> <external-project> <external-target> [--target-id <target-id>]
+
+ARGUMENTS:
+  <target-name>           Name of the target to add dependency to
+  <external-project>      Path to the external project
+  <external-target>       Name of the target in the external project
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --target-id <target-id> Specific GUID of the external target (optional)
+  --version               Show the version.
+  -h, --help              Show help information.
+

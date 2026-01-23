@@ -1,0 +1,19 @@
+OVERVIEW: Enable test coverage for a scheme
+
+USAGE: xcodeproj-cli enable-test-coverage [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <scheme-name> [--targets <targets>]
+
+ARGUMENTS:
+  <scheme-name>           Name of the scheme to configure
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --targets <targets>     Comma-separated list of specific targets to collect
+                          coverage for (default: all targets)
+  --version               Show the version.
+  -h, --help              Show help information.
+

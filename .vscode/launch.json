@@ -6,8 +6,9 @@
             "args": [],
             "cwd": "${workspaceFolder:xcodeproj-cli}",
             "name": "Debug xcodeproj-cli",
-            "program": "${workspaceFolder:xcodeproj-cli}/.build/debug/xcodeproj-cli",
-            "preLaunchTask": "swift: Build Debug xcodeproj-cli"
+            "preLaunchTask": "swift: Build Debug xcodeproj-cli",
+            "target": "xcodeproj-cli",
+            "configuration": "debug"
         },
         {
             "type": "swift",
@@ -15,8 +16,9 @@
             "args": [],
             "cwd": "${workspaceFolder:xcodeproj-cli}",
             "name": "Release xcodeproj-cli",
-            "program": "${workspaceFolder:xcodeproj-cli}/.build/release/xcodeproj-cli",
-            "preLaunchTask": "swift: Build Release xcodeproj-cli"
+            "preLaunchTask": "swift: Build Release xcodeproj-cli",
+            "target": "xcodeproj-cli",
+            "configuration": "release"
         }
     ]
 }

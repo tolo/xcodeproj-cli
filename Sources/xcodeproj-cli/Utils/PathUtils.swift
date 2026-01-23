@@ -130,4 +130,52 @@ struct PathUtils {
 
     return sorted.first
   }
+
+  /// Compute relative path from group to file for PBXFileReference.path storage
+  /// This matches how Xcode stores file references relative to their parent group
+  /// - Parameters:
+  ///   - groupPath: Logical group path (e.g., "Sources/Models")
+  ///   - filePath: Absolute or relative file path
+  /// - Returns: Relative path suitable for PBXFileReference.path
+  static func computeRelativePath(fromGroup groupPath: String, toFile filePath: String) -> String {
+    let fileName = (filePath as NSString).lastPathComponent
+
+    // If groupPath is empty, return just the filename
+    guard !groupPath.isEmpty else {
+      return fileName
+    }
+
+    // Split paths into components
+    let groupComponents = groupPath.split(separator: "/").map(String.init)
+    let filePathComponents = filePath.split(separator: "/").map(String.init)
+
+    // If file path has fewer components than group path, just return filename
+    guard filePathComponents.count > groupComponents.count else {
+      return fileName
+    }
+
+    // Try to find where the group path matches in the file path
+    // Look for the group components appearing consecutively in the file path
+    var matchIndex: Int?
+    for i in 0...(filePathComponents.count - groupComponents.count) {
+      let slice = Array(filePathComponents[i..<(i + groupComponents.count)])
+      if slice == groupComponents {
+        matchIndex = i
+        break
+      }
+    }
+
+    // If we found a match, return the path components after the match
+    if let matchIndex = matchIndex {
+      let startIndex = matchIndex + groupComponents.count
+      if startIndex < filePathComponents.count {
+        let relativeComponents = Array(filePathComponents[startIndex...])
+        return relativeComponents.joined(separator: "/")
+      }
+    }
+
+    // If no match found, return just the filename
+    // This handles cases where the file path doesn't contain the group path
+    return fileName
+  }
 }

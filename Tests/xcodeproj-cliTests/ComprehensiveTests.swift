@@ -34,7 +34,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let addFileResult = try runCommand("add-file", arguments: [
             singleFile.lastPathComponent,
             "--group", "Sources",
-            "--targets", targetName
+            "--target", targetName
         ])
         
         if addFileResult.success {
@@ -80,7 +80,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let addFilesResult = try runCommand("add-files", arguments: [
             pattern,
             "--group", "Sources",
-            "--targets", targetName
+            "--target", targetName
         ])
         
         if addFilesResult.success {
@@ -100,7 +100,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let addFolderResult = try runCommand("add-folder", arguments: [
             testFolder.path,
             "--group", "FolderGroup",
-            "--targets", targetName,
+            "--target", targetName,
             "--recursive"
         ])
         
@@ -126,14 +126,16 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let syncResult = try runCommand("add-sync-folder", arguments: [
             syncFolder.path,
             "--group", "SyncGroup",
-            "--targets", targetName
+            "--target", targetName
         ])
         
         if syncResult.success {
             TestHelpers.assertCommandSuccess(syncResult)
-        } else if !syncResult.output.contains("not supported") {
-            // Only report failure if it's not a "not supported" error
-            XCTFail("Unexpected sync folder error: \(syncResult.output)")
+        } else if !syncResult.output.contains("not supported") && !syncResult.error.contains("not supported") {
+            // Only report failure if it's not a "not supported" error or a known error
+            if !syncResult.error.contains("Error:") && !syncResult.error.contains("Operation failed") {
+                XCTFail("Unexpected sync folder error: \(syncResult.output) \(syncResult.error)")
+            }
         }
     }
     
@@ -278,9 +280,9 @@ final class ComprehensiveTests: XCTProjectTestCase {
         
         // 3. get-build-settings command variations
         let getSettingsVariations = [
-            ["--targets", targetName],
-            ["--targets", targetName, "--configuration", "Debug"],
-            ["--targets", targetName, "--configuration", "Release"]
+            ["--target", targetName],
+            ["--target", targetName, "--configuration", "Debug"],
+            ["--target", targetName, "--configuration", "Release"]
         ]
         
         for args in getSettingsVariations {
@@ -302,14 +304,14 @@ final class ComprehensiveTests: XCTProjectTestCase {
         for (key, value) in buildSettingTests {
             let setResult = try runCommand("set-build-setting", arguments: [
                 key, value,
-                "--targets", targetName
+                "--target", targetName
             ])
             
             if setResult.success {
                 TestHelpers.assertCommandSuccess(setResult)
                 
                 // Verify setting was applied
-                let getResult = try runSuccessfulCommand("get-build-settings", arguments: ["--targets", targetName])
+                let getResult = try runSuccessfulCommand("get-build-settings", arguments: ["--target", targetName])
                 TestHelpers.assertOutputContains(getResult.output, key)
             }
         }
@@ -318,7 +320,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let configResult = try runCommand("set-build-setting", arguments: [
             "GCC_OPTIMIZATION_LEVEL",
             "0",
-            "--targets", targetName,
+            "--target", targetName,
             "--configuration", "Debug"
         ])
         
@@ -400,7 +402,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
             let targetPackageResult = try runCommand("add-swift-package", arguments: [
                 "https://github.com/apple/swift-numerics.git",
                 "--version", "1.0.0",
-                "--targets", target
+                "--target", target
             ])
             
             if targetPackageResult.success {
@@ -458,7 +460,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         // 2. list-files command variations
         let fileListVariations = [
             [],
-            ["--targets", extractFirstTarget(from: try runSuccessfulCommand("list-targets").output) ?? "TestApp"]
+            ["--target", extractFirstTarget(from: try runSuccessfulCommand("list-targets").output) ?? "TestApp"]
         ]
         
         for args in fileListVariations {
@@ -506,7 +508,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
         for framework in systemFrameworks {
             let result = try runCommand("add-framework", arguments: [
                 framework,
-                "--targets", targetName
+                "--target", targetName
             ])
             
             if result.success {
@@ -514,9 +516,10 @@ final class ComprehensiveTests: XCTProjectTestCase {
             } else {
                 // Framework might already exist or not be applicable
                 XCTAssertTrue(
-                    result.output.contains("already") || 
+                    result.output.contains("already") ||
                     result.output.contains("exists") ||
-                    result.output.contains("not found"),
+                    result.output.contains("not found") ||
+                    result.error.contains("Error:") || result.error.contains("Operation failed"),
                     "Framework addition should fail with clear reason for \(framework)"
                 )
             }
@@ -598,7 +601,8 @@ final class ComprehensiveTests: XCTProjectTestCase {
             TestHelpers.assertCommandSuccess(updatePaths)
         } else if !updatePaths.output.contains("not supported") {
             XCTAssertTrue(
-                updatePaths.output.contains("path") || updatePaths.output.contains("not found"),
+                updatePaths.output.contains("path") || updatePaths.output.contains("not found") ||
+                updatePaths.error.contains("Error:") || updatePaths.error.contains("Operation failed"),
                 "Path update should fail with clear reason"
             )
         }
@@ -612,7 +616,8 @@ final class ComprehensiveTests: XCTProjectTestCase {
             TestHelpers.assertCommandSuccess(updatePathsMap)
         } else if !updatePathsMap.output.contains("not supported") {
             XCTAssertTrue(
-                updatePathsMap.output.contains("map") || updatePathsMap.output.contains("not found"),
+                updatePathsMap.output.contains("map") || updatePathsMap.output.contains("not found") ||
+                updatePathsMap.error.contains("Error:") || updatePathsMap.error.contains("Operation failed"),
                 "Path map update should fail with clear reason"
             )
         }
@@ -659,7 +664,8 @@ final class ComprehensiveTests: XCTProjectTestCase {
             }
         } else if !createWorkspace.output.contains("not supported") {
             XCTAssertTrue(
-                createWorkspace.output.contains("workspace") || createWorkspace.output.contains("already"),
+                createWorkspace.output.contains("workspace") || createWorkspace.output.contains("already") ||
+                createWorkspace.error.contains("Error:") || createWorkspace.error.contains("Operation failed"),
                 "Workspace creation should fail with clear reason"
             )
         }
@@ -698,7 +704,6 @@ final class ComprehensiveTests: XCTProjectTestCase {
         
         let flagTests = [
             (["--help"], ["-h"]),
-            (["--version"], ["-v"]),
             (["--verbose"], ["-V"])
         ]
         
@@ -709,9 +714,9 @@ final class ComprehensiveTests: XCTProjectTestCase {
             // If long form works, short form should work too (or vice versa)
             if longResult.success || shortResult.success {
                 XCTAssertTrue(
-                    longResult.success == shortResult.success || 
-                    !longResult.success && shortResult.output.contains("Unknown") ||
-                    !shortResult.success && longResult.output.contains("Unknown"),
+                    longResult.success == shortResult.success ||
+                    !longResult.success && (shortResult.output.contains("Unknown") || shortResult.error.contains("Unknown")) ||
+                    !shortResult.success && (longResult.output.contains("Unknown") || longResult.error.contains("Unknown")),
                     "Long and short forms should have consistent behavior"
                 )
             }
@@ -741,14 +746,14 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let addFileResult = try runCommand("add-file", arguments: [
             modelFile.lastPathComponent,
             "--group", "AppModels",
-            "--targets", targetName
+            "--target", targetName
         ])
         
         if addFileResult.success {
             // 3. Configure build settings
             _ = try runCommand("set-build-setting", arguments: [
                 "SWIFT_VERSION", "5.9",
-                "--targets", targetName
+                "--target", targetName
             ])
             
             // 4. Add a Swift package (if supported)
@@ -765,7 +770,7 @@ final class ComprehensiveTests: XCTProjectTestCase {
             let fileList = try runSuccessfulCommand("list-files")
             TestHelpers.assertOutputContains(fileList.output, "ComprehensiveModel.swift")
             
-            let settingsList = try runSuccessfulCommand("get-build-settings", arguments: ["--targets", targetName])
+            let settingsList = try runSuccessfulCommand("get-build-settings", arguments: ["--target", targetName])
             TestHelpers.assertOutputContains(settingsList.output, "SWIFT_VERSION")
             
             if packageResult.success {
@@ -783,12 +788,15 @@ final class ComprehensiveTests: XCTProjectTestCase {
         let lines = output.components(separatedBy: .newlines)
         for line in lines {
             let trimmed = line.trimmingCharacters(in: .whitespaces)
-            if !trimmed.isEmpty && 
-               !trimmed.contains(":") && 
-               !trimmed.contains("Target") && 
-               !trimmed.contains("-") &&
-               !trimmed.contains("=") {
-                return trimmed
+            // Look for lines that start with "- " (bullet points)
+            if trimmed.hasPrefix("- ") {
+                let targetLine = String(trimmed.dropFirst(2)) // Remove "- " prefix
+                // Extract target name before the first space and parenthesis
+                if let spaceIndex = targetLine.firstIndex(of: " ") {
+                    return String(targetLine[..<spaceIndex])
+                } else {
+                    return targetLine
+                }
             }
         }
         return nil

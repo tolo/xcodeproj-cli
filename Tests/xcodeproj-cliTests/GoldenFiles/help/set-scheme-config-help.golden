@@ -1,0 +1,23 @@
+OVERVIEW: Set build configurations for scheme actions
+
+USAGE: xcodeproj-cli set-scheme-config [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <scheme-name> [--build <build>] [--run <run>] [--test <test>] [--profile <profile>] [--analyze <analyze>] [--archive <archive>]
+
+ARGUMENTS:
+  <scheme-name>           Name of the scheme to configure
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --build <build>         Set build configuration
+  --run <run>             Set run configuration
+  --test <test>           Set test configuration
+  --profile <profile>     Set profile configuration
+  --analyze <analyze>     Set analyze configuration
+  --archive <archive>     Set archive configuration
+  --version               Show the version.
+  -h, --help              Show help information.
+

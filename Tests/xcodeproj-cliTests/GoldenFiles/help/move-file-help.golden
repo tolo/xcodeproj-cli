@@ -1,0 +1,20 @@
+OVERVIEW: Move or rename a file in the project
+
+USAGE: xcodeproj-cli move-file [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <file-path> [<new-path>] [--to-group <to-group>]
+
+ARGUMENTS:
+  <file-path>             Current path or name of the file
+  <new-path>              New path or name for the file (optional if using
+                          --to-group)
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --to-group <to-group>   Move file to a different group
+  --version               Show the version.
+  -h, --help              Show help information.
+

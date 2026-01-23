@@ -1,0 +1,17 @@
+OVERVIEW: Remove a target from the project
+
+USAGE: xcodeproj-cli remove-target [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <target-name>
+
+ARGUMENTS:
+  <target-name>           Name of the target to remove
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  --version               Show the version.
+  -h, --help              Show help information.
+

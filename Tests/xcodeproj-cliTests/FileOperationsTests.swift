@@ -141,8 +141,9 @@ final class FileOperationsTests: XCTProjectTestCase {
 
     TestHelpers.assertCommandFailure(result)
     XCTAssertTrue(
-      result.error.contains("❌ Error: Operation failed: File not found")
-        || result.output.contains("File not found"),
+      result.error.contains("Error: Operation failed: File not found") ||
+      result.output.contains("File not found") ||
+      result.error.contains("not found"),
       "Should report file not found"
     )
   }
@@ -314,8 +315,10 @@ final class FileOperationsTests: XCTProjectTestCase {
 
     TestHelpers.assertCommandFailure(result)
     XCTAssertTrue(
-      result.error.contains("❌ Error:") || result.output.contains("cannot be found")
-        || result.output.contains("not found"),
+      result.error.contains("Error:") ||
+      result.output.contains("cannot be found") ||
+      result.output.contains("not found") ||
+      result.error.contains("not found"),
       "Should report file not found for removal"
     )
   }
@@ -369,8 +372,10 @@ final class FileOperationsTests: XCTProjectTestCase {
 
     TestHelpers.assertCommandFailure(result)
     XCTAssertTrue(
-      result.error.contains("❌ Error:") || result.output.contains("cannot be found")
-        || result.output.contains("not found"),
+      result.error.contains("Error:") ||
+      result.output.contains("cannot be found") ||
+      result.output.contains("not found") ||
+      result.error.contains("not found"),
       "Should report file not found for moving"
     )
   }

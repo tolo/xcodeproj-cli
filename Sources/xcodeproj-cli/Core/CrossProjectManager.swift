@@ -153,10 +153,20 @@ class CrossProjectManager {
       projectRef = try addProjectReference(externalProjectPath: externalProjectPath)
     }
 
+    // Wire the external target GUID if provided
+    let remoteGlobalIDRef: PBXContainerItemProxy.RemoteGlobalID?
+    if let guid = externalTargetGUID {
+      // Convert String GUID to RemoteGlobalID
+      remoteGlobalIDRef = .string(guid)
+    } else {
+      // Keep nil for backward compatibility - use name-based lookup
+      remoteGlobalIDRef = nil
+    }
+
     // Create container item proxy for the dependency
     let containerProxy = PBXContainerItemProxy(
       containerPortal: .fileReference(projectRef),
-      remoteGlobalID: nil,  // TODO: Need to resolve RemoteGlobalID type conversion
+      remoteGlobalID: remoteGlobalIDRef,
       proxyType: .nativeTarget,
       remoteInfo: externalTargetName
     )

@@ -1,0 +1,21 @@
+OVERVIEW: Add an existing file to a target's compile sources or resources
+
+USAGE: xcodeproj-cli add-target-file [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <file-path> --targets <targets> ...
+
+ARGUMENTS:
+  <file-path>             Path to the file (must already exist in project)
+                          Can be: filename only (Model.swift), partial path
+                          (Sources/Model.swift), or full project path
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --targets, --target <targets>
+                          Target names (accepts single or multiple targets)
+  --version               Show the version.
+  -h, --help              Show help information.
+

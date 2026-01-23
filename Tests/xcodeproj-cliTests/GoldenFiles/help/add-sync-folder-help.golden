@@ -1,0 +1,19 @@
+OVERVIEW: Add a synchronized folder that maintains sync with filesystem
+
+USAGE: xcodeproj-cli add-sync-folder [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <folder-path> --group <group> --targets <targets> ...
+
+ARGUMENTS:
+  <folder-path>           Path to the folder to add
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -g, --group <group>     Group to add the folder to
+  -t, --targets <targets> Target names to add folder to
+  --version               Show the version.
+  -h, --help              Show help information.
+

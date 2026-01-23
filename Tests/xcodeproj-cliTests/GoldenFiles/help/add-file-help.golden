@@ -1,0 +1,47 @@
+OVERVIEW: Add a single file to specified group and targets
+
+Adds a single file to the Xcode project in the specified group and targets.
+
+The --group parameter accepts either:
+• Simple group name: "Models"
+• Hierarchical path: "App/Source/Models"
+
+Hierarchical paths are resolved to find the exact group. If path resolution
+fails, the tool attempts to find a group with the last component name.
+
+Examples:
+  # Using simple group name
+  xcodeproj-cli add-file MyFile.swift --group Models --targets MyApp
+
+  # Using hierarchical path (NEW)
+  xcodeproj-cli add-file MyFile.swift --group App/Source/Models --targets MyApp
+
+  # Real-world examples
+  xcodeproj-cli add-file AppDelegate.swift \
+    --group MyApp/Source/Application \
+    --targets MyApp
+
+  xcodeproj-cli add-file LoginView.swift \
+    --group Features/Authentication/Views \
+    --targets MyApp
+
+To discover groups:
+  xcodeproj-cli list-groups --show-names
+
+USAGE: xcodeproj-cli add-file [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <file-path> --group <group> --targets <targets> ...
+
+ARGUMENTS:
+  <file-path>             Path to the file to add
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -g, --group <group>     Group to add the file to
+  -t, --targets <targets> Target names to add file to
+  --version               Show the version.
+  -h, --help              Show help information.
+

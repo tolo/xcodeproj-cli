@@ -16,7 +16,16 @@ class CacheManager {
   private var groupCache: [String: PBXGroup] = [:]
   private var groupPathCache: [String: String] = [:]  // Maps group path to full resolved path
   private var targetCache: [String: PBXNativeTarget] = [:]
+
+  /// File reference cache using multiple key formats:
+  /// - Composite key: "{groupPath}/{fileName}" (e.g., "App/Models/User.swift")
+  /// - Path-only: fileRef.path (backward compatibility)
+  /// - Name-only: fileRef.name (backward compatibility)
   private var fileReferenceCache: [String: PBXFileReference] = [:]
+
+  /// Track which group owns each file for group-aware lookups
+  private var fileGroupMembership: [PBXFileReference: PBXGroup] = [:]
+
   private var buildPhaseCache: [String: [PBXBuildPhase]] = [:]  // Target name -> build phases
 
   private let pbxproj: PBXProj
@@ -85,12 +94,50 @@ class CacheManager {
 
   private func rebuildFileReferenceCache() {
     fileReferenceCache.removeAll()
-    for fileRef in pbxproj.fileReferences {
-      if let path = fileRef.path {
-        fileReferenceCache[path] = fileRef
+    fileGroupMembership.removeAll()
+
+    // Walk group hierarchy to track membership and build composite keys
+    do {
+      guard let rootGroup = try pbxproj.rootGroup() else {
+        print("⚠️  Unable to access root group for file reference cache")
+        return
       }
-      if let name = fileRef.name {
-        fileReferenceCache[name] = fileRef
+      buildFileReferenceCache(from: rootGroup, currentPath: "")
+    } catch {
+      print("⚠️  Unable to build file reference cache: \(error)")
+    }
+  }
+
+  private func buildFileReferenceCache(from group: PBXGroup, currentPath: String) {
+    let groupName = group.name ?? group.path ?? ""
+    let fullGroupPath = currentPath.isEmpty ? groupName : "\(currentPath)/\(groupName)"
+
+    // Process files in this group
+    for child in group.children {
+      if let fileRef = child as? PBXFileReference {
+        // Track group membership
+        fileGroupMembership[fileRef] = group
+
+        // Build composite cache key using fileRef.path (the relative path from group)
+        // This matches how FileService creates cache keys
+        if let relativePath = fileRef.path, !relativePath.isEmpty, !fullGroupPath.isEmpty {
+          let compositeKey = "\(fullGroupPath)/\(relativePath)"
+          fileReferenceCache[compositeKey] = fileRef
+        }
+
+        // Also cache by path alone for backward compatibility lookups
+        if let path = fileRef.path {
+          fileReferenceCache[path] = fileRef
+        }
+        // Cache by name only if different from path
+        if let name = fileRef.name, name != fileRef.path {
+          fileReferenceCache[name] = fileRef
+        }
+      } else if let childGroup = child as? PBXGroup {
+        // Recursively process child groups
+        let childName = childGroup.name ?? childGroup.path ?? ""
+        let childPath = currentPath.isEmpty ? childName : "\(currentPath)/\(childName)"
+        buildFileReferenceCache(from: childGroup, currentPath: childPath)
       }
     }
   }
@@ -168,6 +215,7 @@ class CacheManager {
     groupPathCache.removeAll()
     targetCache.removeAll()
     fileReferenceCache.removeAll()
+    fileGroupMembership.removeAll()
     buildPhaseCache.removeAll()
     rebuildAllCaches()
   }

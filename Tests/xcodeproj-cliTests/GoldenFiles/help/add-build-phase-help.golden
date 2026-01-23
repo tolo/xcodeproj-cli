@@ -1,0 +1,34 @@
+OVERVIEW: Add a build phase to a target
+
+Add a build phase (script, copy-files, etc.) to a target.
+
+Examples:
+  xcodeproj-cli add-build-phase script "Run SwiftLint" --target MyApp --script
+"swiftlint"
+  xcodeproj-cli add-build-phase copy-files "Copy Resources" --target MyApp
+  xcodeproj-cli add-build-phase script "Post Build" -t MyApp -s "echo 'Build
+complete'"
+
+Notes:
+  - Script is only applicable for script build phases
+  - Build phase is added to the end of the target's build phases
+  - Target must exist before adding build phase
+
+USAGE: xcodeproj-cli add-build-phase [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <type> <name> --target <target> [--script <script>]
+
+ARGUMENTS:
+  <type>                  Type of build phase (script, copy-files, etc.)
+  <name>                  Name for the build phase
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --target <target>   Target to add the build phase to
+  -s, --script <script>   Optional script content for script build phases
+  --version               Show the version.
+  -h, --help              Show help information.
+

@@ -151,7 +151,7 @@ final class TargetDuplicationIntegrityTests: XCTProjectTestCase {
     let setBuildSettingResult = try runSuccessfulCommand(
       "set-build-setting",
       arguments: [
-        "--target", originalTarget,
+        "--targets", originalTarget,
         "--config", "Debug",
         "PRODUCT_NAME",
         "OriginalProduct",
@@ -207,10 +207,14 @@ final class TargetDuplicationIntegrityTests: XCTProjectTestCase {
     let lines = output.components(separatedBy: .newlines)
     for line in lines {
       let trimmed = line.trimmingCharacters(in: .whitespaces)
-      if !trimmed.isEmpty && !trimmed.contains(":") && !trimmed.contains("Target")
-        && !trimmed.contains("-") && !trimmed.contains("=")
-      {
-        return trimmed
+      // Match lines like "- TestApp (com.apple.product-type.application)"
+      if trimmed.hasPrefix("- ") {
+        let afterBullet = trimmed.dropFirst(2)
+        // Extract target name before the product type in parentheses
+        if let spaceIndex = afterBullet.firstIndex(of: " ") {
+          return String(afterBullet[..<spaceIndex])
+        }
+        return String(afterBullet)
       }
     }
     return nil

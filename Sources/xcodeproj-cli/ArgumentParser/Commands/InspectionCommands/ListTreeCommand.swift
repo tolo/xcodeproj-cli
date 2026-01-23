@@ -19,7 +19,7 @@ struct ListTreeCommand: AsyncParsableCommand {
 
   @Option(
     name: [.customLong("target"), .customShort("t")],
-    help: "Optional: show tree for files in specified target only")
+    help: "Limit tree to files in specified target")
   var target: String?
 
   @MainActor

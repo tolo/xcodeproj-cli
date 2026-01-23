@@ -36,13 +36,13 @@ struct GetBuildSettingsCommand: AsyncParsableCommand {
 
   @Option(
     name: [.customLong("config"), .customShort("c")],
-    help: "Optional: specific configuration name"
+    help: "Limit to specific configuration"
   )
   var config: String?
 
   @Option(
     name: [.customLong("configuration")],
-    help: "Optional: specific configuration name (alternative to --config)"
+    help: "Limit to specific configuration (alternative to --config)"
   )
   var configuration: String?
 

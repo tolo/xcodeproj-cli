@@ -37,7 +37,7 @@ struct SetBuildSettingCommand: AsyncParsableCommand {
 
   @Option(
     name: [.customLong("config"), .customShort("c")],
-    help: "Optional: specific configuration name"
+    help: "Limit to specific configuration"
   )
   var configuration: String?
 

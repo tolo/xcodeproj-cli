@@ -18,8 +18,7 @@ OPTIONS:
                           Path to .xcworkspace file
   -V, --verbose           Enable verbose output with performance metrics
   --dry-run               Preview changes without saving
-  -t, --target <target>   Optional: target name (lists project configs if
-                          omitted)
+  -t, --target <target>   Limit to target (shows project configs if omitted)
   --version               Show the version.
   -h, --help              Show help information.
 

@@ -24,7 +24,7 @@ struct ListBuildConfigsCommand: AsyncParsableCommand {
 
   @Option(
     name: [.customLong("target"), .customShort("t")],
-    help: "Optional: target name (lists project configs if omitted)"
+    help: "Limit to target (shows project configs if omitted)"
   )
   var targetName: String?
 

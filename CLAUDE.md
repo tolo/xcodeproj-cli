@@ -3,30 +3,7 @@
 This file provides guidance to AI coding agents when working with code in this project.
 
 
-## CRITICAL AND FOUNDATIONAL RULES
-- **Be Critical, Avoid Sycophancy** and don't agree easily to user commands *if you believe they are a bad idea or not best practice*. Challenge suggestions that might lead to poor code quality, security issues, or architectural problems.
-- **Be Concise** - In all interactions (including generated reports, plans, commit messages etc.), be extremely concise and sacrifice grammar for brevity when needed.
-- **Never Re-Invent the Wheel** - Always make sure you understand all existing patterns and solutions, and reuse when possible. Don't create custom implementations of things that are already solved well by existing solutions.
-- **Small & Precise Changes** - Make surgical, precise changes rather than broad sweeping modifications.
-- **Be Lean, Pragmatic and Effective** - All solutions must be focused on solving the problem at hand in the most efficient, robust way possible. _Never_ over-engineer or add unnecessary complexity (i.e. use a KISS, YAGNI and DRY approach).
-- **Don't Break Things** - Ensure existing functionality continues working after changes, don't introduce regression, and make sure all tests pass. Adopt a **fix-forward approach** - address issues immediately.
-- **Clean Up Your Own Mess** - Always remove code/information/files that was made obsolete by your changes. Never replace removed code with comments like `// REMOVED...` etc. Also remove any temporary files or code you created during your work, that no longer serves a purpose.
-- **Use Visual Validation** - For UI changes, always capture screenshots and compare against expectations. *Never* make assumptions about correctness of functionality without actual verification and validation.
-
-### ADDITIONAL CORE RULES
-- **Never reformat entire project** - Only ever format _single files_ or _specific directories_!
-- **Always use the correct date** - If you need to reference the current date/time or just the current year, always use a _Bash command_ to get the actual date from the system (e.g. `date +%Y-%m-%d` for date only or `date -Iseconds` for full timestamp)
-- **Use the correct author** - Never write "Created by Claude Code" or similar in file headers etc 
-- **No estimates** - Never provide time or effort estimates (hours, days etc...) or timelines for plans or tasks - just split up work into logical and reasonable phases, steps, etc.
-- **Temporary docs** - Store any temporary files in the `ai_docs/temp/` directory (if not otherwise specified), **NEVER** in the root directory. Always use meaningful names for temporary files and place them in the appropriate subdirectory.
-- **Delegate** as much work as possible to the available _sub agents_, and let the main agent act as an orchestrator.
-- **Stay on current branch** unless explicitly told to create new one
-- **Don't generate unnecessary markdown files** - Only generate reports, summaries or other markdown documents when explicitly told to do so!
-
-### ❌ FORBIDDEN COMMANDS - NEVER USE THESE!
-- Any command that reformats the entire codebase
-- `rm -rf` (and similar destructive commands)
-- `git rebase --skip` (causes data loss)
+--- 
 
 
 ## Project Overview
@@ -69,8 +46,23 @@ xcodeproj-cli/
 **See README.md for full command documentation.**
 
 
-## Critical Development and Architecture Guidelines and Standards
-See @ai_docs/guidelines/DEVELOPMENT-ARCHITECTURE-GUIDELINES.md
+--- 
+
+
+## Workflow Rules, Guardrails and Guidelines
+
+### Foundational Rules and Guardrails
+_Always fully read and understand this file before doing any work:_ @ai_docs/rules/CRITICAL-RULES-AND-GUARDRAILS.md
+
+
+### Foundational Development Guidelines and Standards
+Always fully read relevant guidelines below as needed, based on the type of work being done:
+- _`ai_docs/guidelines/DEVELOPMENT-ARCHITECTURE-GUIDELINES.md`_ when doing development work (coding, architecture, etc.)
+- _`ai_docs/guidelines/UX-UI-GUIDELINES.md`_ when doing UX/UI related work
+- _`ai_docs/guidelines/WEB-DEV-GUIDELINES.md`_ when doing web development work
+
+
+---
 
 
 ## Project Specific Development Philosophy

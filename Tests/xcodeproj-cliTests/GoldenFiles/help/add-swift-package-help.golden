@@ -15,7 +15,7 @@ OPTIONS:
   -v, --version <version> Version requirement (e.g., '1.0.0', 'from: 1.0.0')
   -b, --branch <branch>   Branch requirement (e.g., 'main', 'develop')
   -c, --commit <commit>   Commit hash requirement
-  -t, --target <target>   Optional: target to add package to
+  -t, --target <target>   Link package to specific target
   --version               Show the version.
   -h, --help              Show help information.
 

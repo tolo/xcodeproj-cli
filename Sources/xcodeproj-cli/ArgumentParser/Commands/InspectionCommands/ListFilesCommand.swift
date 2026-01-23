@@ -18,12 +18,12 @@ struct ListFilesCommand: AsyncParsableCommand {
 
   @OptionGroup var global: GlobalOptions
 
-  @Argument(help: "Optional: specific group to list files from")
+  @Argument(help: "Limit listing to specific group")
   var groupName: String?
 
   @Option(
     name: [.customLong("target"), .customShort("t")],
-    help: "Optional: list only files in specified target")
+    help: "Limit to files in specified target")
   var target: String?
 
   @MainActor

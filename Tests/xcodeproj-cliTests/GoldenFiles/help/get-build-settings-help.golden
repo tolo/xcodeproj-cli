@@ -21,9 +21,9 @@ OPTIONS:
   -V, --verbose           Enable verbose output with performance metrics
   --dry-run               Preview changes without saving
   -t, --target <target>   Target name (alternative to positional argument)
-  -c, --config <config>   Optional: specific configuration name
+  -c, --config <config>   Limit to specific configuration
   --configuration <configuration>
-                          Optional: specific configuration name (alternative to
+                          Limit to specific configuration (alternative to
                           --config)
   --version               Show the version.
   -h, --help              Show help information.

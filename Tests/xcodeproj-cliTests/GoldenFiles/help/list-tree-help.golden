@@ -9,7 +9,7 @@ OPTIONS:
                           Path to .xcworkspace file
   -V, --verbose           Enable verbose output with performance metrics
   --dry-run               Preview changes without saving
-  -t, --target <target>   Optional: show tree for files in specified target only
+  -t, --target <target>   Limit tree to files in specified target
   --version               Show the version.
   -h, --help              Show help information.
 

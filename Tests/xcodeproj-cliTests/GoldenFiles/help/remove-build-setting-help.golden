@@ -19,7 +19,7 @@ OPTIONS:
   -V, --verbose           Enable verbose output with performance metrics
   --dry-run               Preview changes without saving
   -t, --targets <targets> Comma-separated list of target names
-  -c, --config <config>   Optional: specific configuration name
+  -c, --config <config>   Limit to specific configuration
   --version               Show the version.
   -h, --help              Show help information.
 

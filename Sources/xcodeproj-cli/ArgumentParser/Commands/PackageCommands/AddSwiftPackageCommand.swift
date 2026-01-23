@@ -37,7 +37,7 @@ struct AddSwiftPackageCommand: AsyncParsableCommand {
 
   @Option(
     name: [.customLong("target"), .customShort("t")],
-    help: "Optional: target to add package to")
+    help: "Link package to specific target")
   var target: String?
 
   @MainActor

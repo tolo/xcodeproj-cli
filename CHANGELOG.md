@@ -5,6 +5,31 @@ All notable changes to xcodeproj-cli will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-01-23
+
+### Added
+- **`link-package-product` command** - Link an existing Swift Package product to a target
+  - Useful when a package is already in the project but needs linking to additional targets
+  - `--package` option for disambiguation when product name doesn't match package URL
+  - Example: `xcodeproj-cli link-package-product RealmSwift --target MyApp --package https://github.com/realm/realm-swift.git`
+- **`unlink-package-product` command** - Unlink a Swift Package product from a target without removing the package
+  - Removes from both Frameworks and Embed Frameworks build phases
+  - Cleans up orphaned product dependencies
+  - Example: `xcodeproj-cli unlink-package-product Alamofire --target MyAppTests`
+
+### Changed
+- **XcodeProj upgraded** from 9.4.3 to 9.7.2+
+  - Now using semver range instead of exact pinning
+  - Swift 6 compatibility confirmed
+
+### Technical
+- **PackageService**: New methods for granular package product management
+  - `linkPackageProduct(_:to:packageURL:)` with explicit package URL support
+  - `unlinkPackageProduct(_:from:)` with proper embed phase cleanup
+  - `listPackageProducts(for:)` for inspection
+- **Build phase handling**: Properly initializes nil `files` arrays before appending
+- **9 new tests** for package product linking/unlinking commands
+
 ## [2.4.0] - 2026-01-23
 
 ### Fixed

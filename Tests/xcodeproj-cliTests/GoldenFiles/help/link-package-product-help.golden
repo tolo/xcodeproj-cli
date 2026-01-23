@@ -1,0 +1,30 @@
+OVERVIEW: Link a Swift Package product to a target
+
+Links an existing Swift Package product to a target. The package must already
+be added to the project. Use this when you need to link a package to additional
+targets after initial setup.
+
+Examples:
+  xcodeproj-cli link-package-product Alamofire --target MyApp
+  xcodeproj-cli link-package-product RealmSwift --target MyApp --package
+https://github.com/realm/realm-swift.git
+
+USAGE: xcodeproj-cli link-package-product [--project <project>] [--workspace <workspace>] [--verbose] [--dry-run] <product-name> --target <target> [--package <package>]
+
+ARGUMENTS:
+  <product-name>          Name of the package product to link (e.g.,
+                          'Alamofire')
+
+OPTIONS:
+  -p, --project <project> Path to .xcodeproj file (default: looks for
+                          *.xcodeproj in current directory)
+  -w, --workspace <workspace>
+                          Path to .xcworkspace file
+  -V, --verbose           Enable verbose output with performance metrics
+  --dry-run               Preview changes without saving
+  -t, --target <target>   Target to link the package product to
+  --package <package>     Package URL for disambiguation when product name
+                          doesn't match package URL
+  --version               Show the version.
+  -h, --help              Show help information.
+

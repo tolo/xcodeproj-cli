@@ -288,6 +288,20 @@ class XcodeProjUtility {
     try packageService.updateSwiftPackages(force: force)
   }
 
+  func linkPackageProduct(_ productName: String, to targetName: String, packageURL: String? = nil)
+    throws
+  {
+    try packageService.linkPackageProduct(productName, to: targetName, packageURL: packageURL)
+  }
+
+  func unlinkPackageProduct(_ productName: String, from targetName: String) throws {
+    try packageService.unlinkPackageProduct(productName, from: targetName)
+  }
+
+  func listPackageProducts(for targetName: String) throws -> [String] {
+    try packageService.listPackageProducts(for: targetName)
+  }
+
   // MARK: - Build Phases
   func addBuildPhase(type: String, name: String, to targetName: String, script: String? = nil)
     throws

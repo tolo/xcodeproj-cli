@@ -47,6 +47,8 @@ SUBCOMMANDS:
   list-swift-packages     List Swift Package dependencies in the project
   update-swift-packages   Update Swift Package dependencies to their latest
                           versions
+  link-package-product    Link a Swift Package product to a target
+  unlink-package-product  Unlink a Swift Package product from a target
   validate                Validate project integrity
   list-files              List files in the project or a specific group
   list-tree               List the complete project structure as a tree

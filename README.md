@@ -275,6 +275,12 @@ xcodeproj-cli remove-swift-package https://github.com/Alamofire/Alamofire
 
 # List all packages
 xcodeproj-cli list-swift-packages
+
+# Link an existing package product to another target
+xcodeproj-cli link-package-product Alamofire --target MyAppTests
+
+# Unlink a package product from a target (keeps package in project)
+xcodeproj-cli unlink-package-product Alamofire --target MyAppTests
 ```
 
 #### 🔧 Build Phases
@@ -559,6 +565,8 @@ done
 | `add-swift-package` | Add Swift package | `add-swift-package https://github.com/pkg --requirement "from: 1.0.0" --target MyApp` |
 | `remove-swift-package` | Remove package | `remove-swift-package https://github.com/pkg` |
 | `list-swift-packages` | Show all packages | `list-swift-packages` |
+| `link-package-product` | Link product to target | `link-package-product Alamofire --target MyApp` |
+| `unlink-package-product` | Unlink product from target | `unlink-package-product Alamofire --target MyAppTests` |
 
 ### 🔨 Build Phases
 | Command | Description | Example |

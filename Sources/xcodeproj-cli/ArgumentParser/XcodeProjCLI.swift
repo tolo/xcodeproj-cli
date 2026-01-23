@@ -12,7 +12,7 @@ struct XcodeProjCLI: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "xcodeproj-cli",
     abstract: "A powerful command-line tool for Xcode project manipulation",
-    version: "2.4.0",
+    version: "2.5.0",
     subcommands: [
       // File Operations (6)
       AddFileCommand.self,
@@ -48,11 +48,13 @@ struct XcodeProjCLI: AsyncParsableCommand {
       // Framework Commands (1)
       AddFrameworkCommand.self,
 
-      // Package Commands (4)
+      // Package Commands (6)
       AddSwiftPackageCommand.self,
       RemoveSwiftPackageCommand.self,
       ListSwiftPackagesCommand.self,
       UpdateSwiftPackagesCommand.self,
+      LinkPackageProductCommand.self,
+      UnlinkPackageProductCommand.self,
 
       // Inspection & Validation (6)
       ValidateCommand.self,

@@ -165,4 +165,200 @@ final class PackageService {
 
     print("ℹ️  Note: Full package update requires Xcode or xcodebuild")
   }
+
+  // MARK: - Package Product Linking
+
+  /// Link an existing Swift Package product to a target
+  /// - Parameters:
+  ///   - productName: Name of the package product (e.g., "Alamofire")
+  ///   - targetName: Target to link the product to
+  ///   - packageURL: Optional explicit package URL for disambiguation
+  func linkPackageProduct(_ productName: String, to targetName: String, packageURL: String? = nil)
+    throws
+  {
+    guard let target = cacheManager.getTarget(targetName) else {
+      throw ProjectError.targetNotFound(targetName)
+    }
+
+    let packages = pbxproj.rootObject?.remotePackages ?? []
+    guard !packages.isEmpty else {
+      throw ProjectError.operationFailed("No Swift Packages in project")
+    }
+
+    // Check if already linked
+    let existingProducts = target.packageProductDependencies ?? []
+    if existingProducts.contains(where: { $0.productName == productName }) {
+      throw ProjectError.operationFailed(
+        "Product '\(productName)' is already linked to target '\(targetName)'")
+    }
+
+    // Find package reference
+    var packageRef: XCRemoteSwiftPackageReference?
+
+    // 1. If explicit URL provided, use it
+    if let url = packageURL {
+      packageRef = packages.first { $0.repositoryURL == url }
+      if packageRef == nil {
+        throw ProjectError.operationFailed(
+          "Package with URL '\(url)' not found in project")
+      }
+    }
+
+    // 2. Look for existing product dependency in other targets
+    if packageRef == nil {
+      for existingTarget in pbxproj.nativeTargets {
+        if let deps = existingTarget.packageProductDependencies,
+          let existingDep = deps.first(where: { $0.productName == productName })
+        {
+          packageRef = existingDep.package
+          break
+        }
+      }
+    }
+
+    // 3. Try URL heuristic (product name in URL)
+    if packageRef == nil {
+      let productLower = productName.lowercased()
+      let candidates = packages.filter { pkg in
+        guard let url = pkg.repositoryURL?.lowercased() else { return false }
+        return url.contains(productLower) || url.hasSuffix("/\(productLower).git")
+      }
+
+      if candidates.count == 1 {
+        packageRef = candidates.first
+      } else if candidates.count > 1 {
+        let urls = candidates.compactMap { $0.repositoryURL }.joined(separator: ", ")
+        throw ProjectError.operationFailed(
+          "Multiple packages could contain '\(productName)': \(urls). "
+            + "Use --package to specify which one.")
+      }
+    }
+
+    // 4. If only one package exists, use it
+    if packageRef == nil && packages.count == 1 {
+      packageRef = packages.first
+    }
+
+    guard let package = packageRef else {
+      let availablePackages = packages.compactMap { $0.repositoryURL }.joined(separator: "\n  - ")
+      throw ProjectError.operationFailed(
+        "Could not determine package for product '\(productName)'. "
+          + "Use --package to specify the package URL.\n"
+          + "Available packages:\n  - \(availablePackages)")
+    }
+
+    // Create product dependency
+    let productDep = XCSwiftPackageProductDependency(productName: productName, package: package)
+    pbxproj.add(object: productDep)
+
+    // Add to target's package dependencies
+    if target.packageProductDependencies == nil {
+      target.packageProductDependencies = []
+    }
+    target.packageProductDependencies?.append(productDep)
+
+    // Add to frameworks build phase
+    let frameworksPhase = try getOrCreateFrameworksBuildPhase(for: target)
+    let buildFile = PBXBuildFile(product: productDep)
+    pbxproj.add(object: buildFile)
+
+    // Ensure files array is initialized before appending
+    if frameworksPhase.files == nil {
+      frameworksPhase.files = []
+    }
+    frameworksPhase.files?.append(buildFile)
+
+    print("✅ Linked '\(productName)' to target '\(targetName)'")
+  }
+
+  /// Unlink a Swift Package product from a target
+  func unlinkPackageProduct(_ productName: String, from targetName: String) throws {
+    guard let target = cacheManager.getTarget(targetName) else {
+      throw ProjectError.targetNotFound(targetName)
+    }
+
+    // Find product dependency
+    guard let deps = target.packageProductDependencies,
+      let productDepIndex = deps.firstIndex(where: { $0.productName == productName })
+    else {
+      throw ProjectError.operationFailed(
+        "Product '\(productName)' is not linked to target '\(targetName)'")
+    }
+
+    let productDep = deps[productDepIndex]
+
+    // Remove from frameworks build phase
+    removeBuildFilesForProduct(productDep, from: target)
+
+    // Remove from embed frameworks phase (Copy Files with .frameworks destination)
+    removeFromEmbedPhase(productDep, from: target)
+
+    // Remove from target's package dependencies
+    target.packageProductDependencies?.remove(at: productDepIndex)
+
+    // Delete product dependency object if no longer referenced
+    let stillReferenced = pbxproj.nativeTargets.contains { t in
+      t.packageProductDependencies?.contains { $0 === productDep } ?? false
+    }
+    if !stillReferenced {
+      pbxproj.delete(object: productDep)
+    }
+
+    print("✅ Unlinked '\(productName)' from target '\(targetName)'")
+  }
+
+  private func removeBuildFilesForProduct(
+    _ productDep: XCSwiftPackageProductDependency, from target: PBXNativeTarget
+  ) {
+    if let frameworksPhase = target.buildPhases.first(where: { $0 is PBXFrameworksBuildPhase })
+      as? PBXFrameworksBuildPhase,
+      let files = frameworksPhase.files
+    {
+      for buildFile in files where buildFile.product === productDep {
+        frameworksPhase.files?.removeAll { $0 === buildFile }
+        pbxproj.delete(object: buildFile)
+      }
+    }
+  }
+
+  private func removeFromEmbedPhase(
+    _ productDep: XCSwiftPackageProductDependency, from target: PBXNativeTarget
+  ) {
+    // Find embed frameworks phase (PBXCopyFilesBuildPhase with .frameworks destination)
+    for phase in target.buildPhases {
+      if let copyPhase = phase as? PBXCopyFilesBuildPhase,
+        copyPhase.dstSubfolderSpec == .frameworks,
+        let files = copyPhase.files
+      {
+        for buildFile in files where buildFile.product === productDep {
+          copyPhase.files?.removeAll { $0 === buildFile }
+          pbxproj.delete(object: buildFile)
+        }
+      }
+    }
+  }
+
+  /// List package products linked to a target
+  func listPackageProducts(for targetName: String) throws -> [String] {
+    guard let target = cacheManager.getTarget(targetName) else {
+      throw ProjectError.targetNotFound(targetName)
+    }
+    return (target.packageProductDependencies ?? []).compactMap { $0.productName }
+  }
+
+  // MARK: - Private Helpers
+
+  private func getOrCreateFrameworksBuildPhase(for target: PBXNativeTarget) throws
+    -> PBXFrameworksBuildPhase
+  {
+    if let existing = target.buildPhases.first(where: { $0 is PBXFrameworksBuildPhase })
+      as? PBXFrameworksBuildPhase
+    {
+      return existing
+    }
+    let newPhase = PBXFrameworksBuildPhase()
+    pbxproj.add(object: newPhase)
+    target.buildPhases.append(newPhase)
+    return newPhase
+  }
 }

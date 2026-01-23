@@ -13,7 +13,7 @@ A Swift command-line tool for manipulating Xcode project files (.xcodeproj) prog
 ## Key Technologies & Versions
 
 - **Swift 6.0** - `@MainActor` isolation on commands, `Sendable` conformance on models
-- **XcodeProj v9.4.3** (exact) - Core manipulation library (waiting for Swift 6 compatibility to upgrade)
+- **XcodeProj v9.7.2+** - Core manipulation library
 - **PathKit v1.0.0+** - Uses `@preconcurrency` import until Swift 6 adoption
 - **swift-argument-parser v1.5.0+** - `AsyncParsableCommand` pattern
 - **macOS 10.15+** minimum

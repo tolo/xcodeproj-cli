@@ -45,12 +45,7 @@ jobs:
       
       - name: Get version from tag
         run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-        
-      - name: Update version in source
-        run: |
-          # Update version number in CLIInterface.swift
-          sed -i '' 's/let VERSION = ".*"/let VERSION = "${VERSION#v}"/' Sources/xcodeproj-cli/CLI/CLIInterface.swift
-          
+
       - name: Build universal binary
         run: |
           # Build universal binary using our build script

@@ -10,7 +10,7 @@
 ### Step 1: Final Preparations
 - [ ] Ensure all PRs are merged to main
 - [ ] Update CHANGELOG.md - change `[UNRELEASED]` to `[X.Y.Z] - YYYY-MM-DD`
-- [ ] Verify version in `Sources/xcodeproj-cli/CLI/CLIInterface.swift` is "X.Y.Z"
+- [ ] Verify version in `Sources/xcodeproj-cli/ArgumentParser/XcodeProjCLI.swift:15` is "X.Y.Z"
 - [ ] Run final tests: `swift test`
 - [ ] Build and test universal binary: `./build-universal.sh`
 
